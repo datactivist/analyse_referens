@@ -1,0 +1,182 @@
+---
+title: "Analyse des données RéFérens III"
+author: "Antoine Blanchard"
+date: "24/02/2021"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyr, quietly = TRUE)
+library(dplyr, quietly = TRUE)
+library(tibble, quietly = TRUE)
+library(stringr, quietly = TRUE)
+library(ggplot2, quietly = TRUE)
+library(forcats, quietly = TRUE)
+library(tm, quietly = TRUE)
+library(RColorBrewer, quietly = TRUE)
+library(knitr, quietly = TRUE)
+```
+
+## Import du référentiel métier RéFérens
+
+RéFérens (REFérentiel des Emplois-types de la recherche et de l’Enseignement Supérieur) version III est [fourni par le Ministère de l'enseignement supérieur, de la recherche et de l'innovation](https://www.data.gouv.fr/fr/datasets/referentiel-metiers-referens-iii-pour-la-filiere-des-itrf-1/), sur leur portail open data. On l'importe et on liste l'ensemble de ses variables (colonnes) :
+
+```{r data}
+data <- read.csv2("fr-esr_referentiel_metier_referens_3.csv") %>%
+  mutate(Id = row_number())
+names(data) #noms de colonnes
+
+variables <- data %>%
+  select(-Id) %>%
+  colnames()
+```
+
+Il comporte `r nrow(data)` lignes ou fiches métiers, conformément à ce qui est annoncé sur le portail data.gouv.fr : 
+
+> Ce jeu de données reprend les informations et nomenclatures concernant les 242 métiers des ingénieurs et personnels techniques de recherche et de formation (ITRF) et des ingénieurs et personnels techniques de la recherche (ITA) décrits dans le répertoire des branches d’activités professionnelles et des emplois-types, dénommé RéFérens (REFérentiel des Emplois-types de la recherche et de l’Enseignement Supérieur).
+
+## Transformation des données
+
+On définit les chaînes de caractère qui seront comptées dans le document comme des occurrences du terme "données" :
+
+```{r donnees}
+donnees <- "Donnees|donnees|Données|données|Donnee|donnee|Donnée|donnée"
+```
+
+On dénombre, pour chaque cellule, les occurrences du terme "données" et on les ajoute aux données brutes pour former le tableau **data_filtered** :
+
+```{r denombrement}
+denombrement <- data %>%
+  column_to_rownames("Id") %>%
+  #select(Nom des colonnes, séparées par une virgule) %>%
+  mutate_all(str_count, donnees) %>%
+  mutate(somme = rowSums(.)) %>%
+  rownames_to_column("Id") %>%
+  filter(somme > 0) %>%
+  arrange(desc(somme))
+  
+data_filtered <- data %>%
+  filter(Id %in% denombrement$Id) %>%
+  mutate(Id = as.character(Id)) %>%
+  left_join(denombrement %>% select(Id, somme), by = "Id")
+```
+
+# Analyse des données
+
+## Fréquence de l'expression "données" par champ
+
+Dans quelles colonnes du jeu de données trouve-t-on le plus le terme "données" ?
+
+```{r frequence_par_variable}
+denombrement %>%
+  select(-somme) %>%
+  column_to_rownames("Id") %>%
+  summarise_all(sum) %>%
+  rownames_to_column("Id") %>%
+  gather("variable", "somme", -Id) %>%
+  filter(somme > 0) %>%
+  ggplot(aes(x=fct_reorder(variable, somme), y = somme)) +
+  geom_col(aes(fill = variable), color = "grey50") +
+  labs(x = "", y = "Fréquence")+
+  coord_flip()+
+  theme_classic() +
+  theme(legend.position = "none")
+```
+
+Comme on pouvait s'y attendre, le terme données apparaît le plus dans les champs des fiches métiers qui décrivent les compétences opérationnelles (rang 1) et les activités principales (rang 2). Il apparaît assez peu dans l'intitulé des fiches métiers (voir plus loin pour une analyse détaillée), qui est au 9e rang, précédé du champ "intitulé précédent" qui mérite d'être creusé pour comprendre pourquoi certaines occurrences ont disparu. Au 6e rang, donc assez haut, on trouve le champ "Factures d'évolution à moyen terme" du métier qui vise, selon la documentation de RéFérens, à identifier les facteurs clés et en déduire leur impact qualitatif sur le métier.
+
+
+## Fréquence de l'expression "données" par BAP
+
+Proportion des fiches métiers qui contiennent l'expression "données" par BAP :
+
+```{r frequence_par_BAP, message=FALSE, warning=FALSE}
+BAP_filtered <- data_filtered %>%
+  count(bap) %>%
+  arrange(bap)
+
+BAP <- data %>%
+  count(bap)
+
+BAP_filtered_pourcentage <- BAP_filtered %>%
+  left_join(BAP, BAP_filtered, by = "bap") %>%
+  mutate(pourcentage_bap=round(n.x/n.y,2),
+         bap=fct_reorder(bap, bap, .desc = TRUE))
+
+BAP_filtered_pourcentage %>%
+  ggplot(aes(x = bap, y = pourcentage_bap)) +
+  geom_col(aes(fill = bap), color = "grey50") +
+  labs(x = "", y = "Proportion de fiches métiers contenant ''données'' par BAP") +
+  coord_flip() +
+  theme_classic() +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = brewer.pal(8, "YlOrRd")) +
+  scale_y_continuous(labels = scales::percent, limits = c(0,1))
+```
+
+On constate que les BAP E et D possèdent en proportion la plus grande part de métiers liés aux données : c'est intéressant de voir le soutien à la recherche en SHS si haut. Les BAP A, B et C, qui concernent directement le soutien à la recherche, sont moins concernés par les données que les BAP F et J qui sont liés à l'administration de l'université et se retrouvent plutôt dans l'administration centrale. 
+
+## Fréquence de l'expression "données" par corps
+
+Proportion des fiches métiers qui contiennent l'expression "données" par corps :
+
+```{r frequence_par_corps}
+# Classer les corps dans l'ordre hiérarchique
+ordre_corps <- c("ATRF", "TECH", "AI", "IE", "IR")
+
+corps_filtered <- data_filtered %>%
+  count(referens_cs) %>%
+  arrange(desc(n))
+
+corps <- data %>%
+  count(referens_cs)
+
+corps_filtered_pourcentage <- corps_filtered %>%
+  left_join(corps, corps_filtered, by = "referens_cs") %>%
+  mutate(pourcentage_corps=round(n.x/n.y,2),
+         referens_cs=factor(referens_cs, levels = ordre_corps))
+
+corps_filtered_pourcentage %>%
+  ggplot(aes(x = referens_cs, y = pourcentage_corps)) +
+  geom_col(aes(fill = referens_cs), color = "grey50") +
+  labs(x = "", y = "Proportion de fiches métiers contenant ''données'' par corps") +
+  coord_flip() +
+  theme_classic() +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = brewer.pal(5, "YlGnBu")) +
+  scale_y_continuous(labels = scales::percent, limits = c(0,1))
+```
+
+On constate que la proportion de métiers liés aux données varie en même temps que l'ordre hiérarchique : elle est plus grande pour les corps ayant le plus de missions d'encadrement.
+
+## Liste des 11 métiers dont l'intitulé contient l'expression "données"
+
+```{r 11_metiers}  
+intitule_TRUE <- denombrement %>%
+  filter(denombrement$referens_intitule >0 | denombrement$referens_metiers >0)
+
+intitule_filtered <- data_filtered %>%
+  filter(Id %in% intitule_TRUE$Id) %>%
+  mutate(Id = as.character(Id),
+         referens_cs=factor(referens_cs, levels = ordre_corps)) %>%
+  left_join(data_filtered %>% select(Id, somme), by = "Id") %>%
+  select(referens_intitule, referens_metiers, bap, referens_fap, referens_cs) %>%
+  group_by(bap) %>%
+  arrange(referens_cs, .by_group = TRUE)
+```
+
+```{r intitule_filtered, echo = FALSE, results ='asis'}
+kable(intitule_filtered, caption = "Fiches métiers faisant apparaître le terme 'données' dans leur intitulé ou équivalent")
+```
+
+# TO DO
+## Regarder les métiers qui concentrent le plus le terme "données"
+
+## Regarder les métiers où "données" apparaît dans facteur_d_evolution_moyen_terme
+
+## Regarder les métiers où le terme données apparaît comme "intitulé précédent" et pas dans l'intitulé actuel 
+
+## Afficher le terme "données" en kwic (keyword-in-context) et représenter son voisinnage lexical

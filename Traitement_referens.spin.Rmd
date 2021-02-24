@@ -1,0 +1,134 @@
+
+```{r }
+library(tidyr)
+library(dplyr)
+library(tibble)
+library(stringr)
+library(ggplot2)
+library(forcats)
+library(tm)
+library(RColorBrewer)
+
+data <- read.csv2("fr-esr_referentiel_metier_referens_3.csv") %>%
+  mutate(Id = row_number())
+names(data) #noms de colonnes
+
+donnees <- "Donnees|donnees|Données|données|Donnee|donnee|Donnée|donnée"
+
+variables <- data %>%
+  select(-Id) %>%
+  colnames()
+
+denombrement <- data %>%
+  column_to_rownames("Id") %>%
+  #select(Nom des colonnes, séparées par une virgule) %>%
+  mutate_all(str_count, donnees) %>%
+  mutate(somme = rowSums(.)) %>%
+  rownames_to_column("Id") %>%
+  filter(somme > 0) %>%
+  arrange(desc(somme))
+  
+data_filtered <- data %>%
+  filter(Id %in% denombrement$Id) %>%
+  mutate(Id = as.character(Id)) %>%
+  left_join(denombrement %>% select(Id, somme), by = "Id") 
+
+# Histogramme des variables où apparaissent le plus l'expression "données"
+  
+denombrement %>%
+  select(-somme) %>%
+  column_to_rownames("Id") %>%
+  summarise_all(sum) %>%
+  rownames_to_column("Id") %>%
+  gather("variable", "somme", -Id) %>%
+  filter(somme > 0) %>%
+  ggplot(aes(x=fct_reorder(variable, somme), y = somme)) +
+  geom_col(aes(fill = variable), color = "grey50") +
+  labs(x = "", y = "Fréquence")+
+  coord_flip()+
+  theme_classic() +
+  theme(legend.position = "none")
+
+# Histogramme des BAP où apparaissent le plus l'expression "données"
+
+BAP_filtered <- data_filtered %>%
+  count(bap) %>%
+  arrange(bap)
+
+BAP <- data %>%
+  count(bap)
+
+BAP_filtered_pourcentage <- BAP_filtered %>%
+  left_join(BAP, BAP_filtered, by = "bap") %>%
+  mutate(pourcentage_bap=round(n.x/n.y,2),
+         bap=fct_reorder(bap, bap, .desc = TRUE))
+
+BAP_filtered_pourcentage %>%
+  ggplot(aes(x = bap, y = pourcentage_bap)) +
+  geom_col(aes(fill = bap), color = "grey50") +
+  labs(x = "", y = "Proportion de fiches métiers contenant ''données'' par BAP") +
+  coord_flip() +
+  theme_classic() +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = brewer.pal(8, "YlOrRd")) +
+  scale_y_continuous(labels = scales::percent)
+
+# Histogramme des corps où apparaissent le plus l'expression "données"
+
+# Classer les corps dans l'ordre hiérarchique
+ordre_corps <- c("ATRF", "TECH", "AI", "IE", "IR")
+
+corps_filtered <- data_filtered %>%
+  count(referens_cs) %>%
+  arrange(desc(n))
+
+corps <- data %>%
+  count(referens_cs)
+
+corps_filtered_pourcentage <- corps_filtered %>%
+  left_join(corps, corps_filtered, by = "referens_cs") %>%
+  mutate(pourcentage_corps=round(n.x/n.y,2),
+         referens_cs=factor(referens_cs, levels = ordre_corps))
+
+corps_filtered_pourcentage %>%
+  ggplot(aes(x = referens_cs, y = pourcentage_corps)) +
+  geom_col(aes(fill = referens_cs), color = "grey50") +
+  labs(x = "", y = "Proportion de fiches métiers contenant ''données'' par corps") +
+  coord_flip() +
+  theme_classic() +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = brewer.pal(5, "YlGnBu")) +
+  scale_y_continuous(labels = scales::percent, limits = c(0,1))
+
+# Tableau des 11 métiers dont l'intitulé ou le métier contient l'expression "données"
+  
+intitule_TRUE <- denombrement %>%
+  filter(denombrement$referens_intitule >0 | denombrement$referens_metiers >0)
+
+intitule_filtered <- data_filtered %>%
+  filter(Id %in% intitule_TRUE$Id) %>%
+  mutate(Id = as.character(Id)) %>%
+  left_join(data_filtered %>% select(Id, somme), by = "Id") %>%
+  select(referens_intitule, referens_metiers, bap, referens_fap, referens_cs, Id) %>%
+  group_by(bap) %>%
+  arrange(referens_cs, .by_group = TRUE)
+
+View(intitule_filtered)
+
+# Afficher les top profil-types qui contiennent l'expression "données"
+
+# Regarder les métiers types où "données" apparaît dans referens_facteur_d_evolution_moyen_terme
+
+# Faire un kwic
+
+# Tout refaire en booléen au lieu du dénombrement (str_select au lieu de str_count)
+```
+
+
+
+---
+title: Traitement_referens.R
+author: antoine
+date: '2021-02-23'
+
+---
