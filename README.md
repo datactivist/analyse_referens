@@ -1,0 +1,5 @@
+# Analyse RéFéRens
+
+L'objectif de cette recherche, menée avec Romain Pierronnet (Institut de Recherche en Gestion (Université Gustave Eiffel – Université Paris-Est Créteil) et Adoc Mètis) est d'étudier en quoi l’enjeu de développement d’une culture partagée de la donnée interroge plus globalement l’ensemble du management des établissements de recherche et d’enseignement supérieur.
+Pour cela, nous nous intéresserons à la place de l'enjeu de la donnée dans les processus de gestion des compétences et de management à l'université.
+
