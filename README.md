@@ -4,4 +4,4 @@ L'objectif de cette recherche, menée avec Romain Pierronnet (Institut de Recher
 
 Pour cela, nous nous intéresserons à la place qu'occupent les compétences de la donnée dans les processus de gestion des emplois et les processus de management à l'université.
 
-Le script principal est niché dans l'exécutable Rmarkdown nommé "Notebook".
+Le script principal est niché dans le document exécutable en Rmarkdown nommé "Notebook".
