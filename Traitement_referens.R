@@ -131,30 +131,29 @@ data_filtered %>%
   select (referens_intitule, referens_metiers, bap, referens_fap, referens_cs, somme) %>%
   head(15)
 
-## Regarder les métiers où "données" apparaît dans facteur_d_evolution_moyen_terme
+## Regarder les métiers des BAP E, F, G, J où "données" apparaît dans facteur_d_evolution_moyen_terme
 
-evolution_metiers <- data %>%
-  filter(Id %in% denombrement$Id) %>%
-  filter(denombrement$referens_facteurs_d_evolution_moyen_terme >0) %>%
+evolution_metiers <- data_filtered %>%
   mutate(Id = as.character(Id)) %>%
-  left_join(denombrement %>% select(Id, somme), by = "Id")
-
-# Il y a un problème avec la ligne "Id = 34" qui apparaît alors que denombrement[34,"referens_facteurs_d_evolution_moyen_terme"] == NULL 0
-
-## Regarder les métiers où le terme données apparaît comme "intitulé précédent" et a disparu de l'intitulé actuel 
-
-suppression_metiers <- data %>%
-  filter(Id %in% denombrement$Id) %>%
-  filter(denombrement, referens_intitule_precedent > 0) %>%
-  filter(denombrement, referens_intitule == 0) %>%
-  mutate(Id = as.character(Id)) %>%
-  left_join(denombrement %>% select(Id, somme), by = "Id") %>%
-  arrange(desc(somme)) %>%
-  select(referens_intitule, bap, referens_fap, referens_facteurs_d_evolution_moyen_terme, referens_cs) %>%
+  left_join(denombrement %>% select(Id, referens_facteurs_d_evolution_moyen_terme), by = "Id") %>%
+  filter(referens_facteurs_d_evolution_moyen_terme.y >0 & referens_bap_id %in% c("E", "F", "G", "J")) %>%
   group_by(bap) %>%
   arrange(referens_cs, .by_group = TRUE)
 
-kable(evolution_metiers, caption = "Métiers dont l'ancien intitulé incluait le terme 'données' mais pas l'intitulé actuel")
+evolution_metiers_extrait <- evolution_metiers %>%
+  select (referens_intitule, bap, referens_fap, referens_cs, somme)
+
+## Regarder les métiers où le terme données apparaît comme "intitulé précédent" et a disparu de l'intitulé actuel 
+
+## Regarder les métiers où "données" apparaît comme "intitulé précédent" et a disparu de l'intitulé actuel
+
+suppression_metiers <- denombrement %>%
+  filter(referens_intitule_precedent >0 & referens_intitule ==0) %>%
+  mutate(Id = as.character(Id)) %>% 
+  select(Id) %>%
+  left_join(data_filtered, by = "Id") %>%
+  select (referens_intitule, referens_intitule_precedent, bap, referens_fap, referens_cs) %>%
+  arrange(referens_cs) # Bug car ne s'ordonne pas par corps
 
 ## boxplot (quartiles) de la distribution des fiches métiers qui concentrent le plus le terme 'données" par corps
 
@@ -165,4 +164,5 @@ data_filtered %>%
   geom_jitter(shape=16, position=position_jitter (0.2)) +
   labs(x= "Corps", y = "Nombre d'occurrences", color="Corps")+
   theme(legend.position = "none")
+
 ## Afficher le terme "données" en kwic (keyword-in-context) et représenter son voisinnage lexical
