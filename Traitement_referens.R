@@ -106,7 +106,6 @@ corps_filtered_pourcentage %>%
   coord_flip() +
   theme_classic() +
   theme(legend.position = "none") +
-  scale_fill_manual(values = brewer.pal(5, "YlGnBu")) +
   scale_y_continuous(labels = scales::percent, limits = c(0,1))
 
 # Tableau des 11 métiers dont l'intitulé ou le métier contient l'expression "données"
