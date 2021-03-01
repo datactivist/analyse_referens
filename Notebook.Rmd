@@ -100,7 +100,7 @@ denombrement %>%
   filter(somme > 0) %>%
   ggplot(aes(x=fct_reorder(variable, somme), y = somme)) +
   geom_col(aes(fill = variable), color = "grey50") +
-  labs(x = "", y = "Fréquence")+
+  labs(x = "", y = "Nombre d'occurrences")+
   coord_flip()+
   theme_classic() +
   theme(legend.position = "none")
@@ -169,6 +169,16 @@ corps_filtered_pourcentage %>%
 
 On constate que la proportion de métiers liés aux données varie en même temps que l'ordre hiérarchique : elle est plus grande pour les corps ayant le plus de missions d'encadrement.
 
+## Fréquence de l'expression "données" par BAP et par corps
+
+```{r stack_corps, results ='asis'}
+data_filtered %>%
+      mutate(referens_cs=factor(referens_cs, levels = ordre_corps)) %>%
+  ggplot(aes(x = referens_bap_id, fill=referens_cs)) +
+    geom_bar() +
+      labs(x= "BAP", y = "Nombre de fiches métiers", fill="Corps")
+```
+
 ## Liste des 11 métiers dont l'intitulé contient l'expression "données"
 
 ```{r 11_metiers}  
@@ -202,11 +212,11 @@ top_metiers <- data_filtered %>%
 kable(top_metiers, caption = "Métiers incluant au moins 15 fois le terme 'données'")
 ```
 
-On constate que ce sont beaucoup de métiers AI, beaucoup en soutien à la recherche. Hypothèse : on a vu que les corps IE et IR possèdent proportionnellement plus de métiers liés **aux** données, mais est-ce que les corps ATRF, TECH et AI possèdent proportionnellement plus de métiers **des** données (c'est-à-dire où le terme apparaît le plus fréquemment) ?
+On constate que ce sont beaucoup de métiers AI, beaucoup en soutien à la recherche. Hypothèse : on a vu que les corps IE et IR possèdent proportionnellement plus de métiers liés **aux** données, mais dans quels corps trouve-t-on les métiers **des** données (c'est-à-dire où le terme apparaît le plus fréquemment) ?
 
-# TO DO
+## Distribution des fiches métiers par corps
 
-## Boxplot de la distribution des fiches métiers par corps
+On trace la distribution des fiches métiers par corps, avec une représentation par boxplot :
 
 ```{r boxplot_corps, results ='asis'}
 data_filtered %>%
@@ -218,17 +228,27 @@ data_filtered %>%
   theme(legend.position = "none")
 ```
 
-## Regarder les métiers où "données" apparaît dans facteur_d_evolution_moyen_terme
+Il apparaît que les corps IE et IR ont la distribution la plus étirée par le haut, ce sont ceux où l'on trouve le plus les métiers **des** données.
+
+# TO DO
+
+## Regarder les métiers des BAP E, F, G, J où "données" apparaît comme facteur d'évolution moyen terme
 
 ```{r evolution_metiers, results ='asis'}
-evolution_metiers <- data %>%
-  filter(Id %in% denombrement$Id) %>%
-  filter(denombrement$referens_facteur_d_evolution_moyen_terme >0) %>%
+evolution_metiers <- data_filtered %>%
   mutate(Id = as.character(Id)) %>%
-  left_join(denombrement %>% select(Id, somme), by = "Id")
+  left_join(denombrement %>% select(Id, referens_facteurs_d_evolution_moyen_terme), by = "Id") %>%
+  filter(referens_facteurs_d_evolution_moyen_terme.y >0 & referens_bap_id %in% c("E", "F", "G", "J")) %>%
+  group_by(bap) %>%
+  arrange(referens_cs, .by_group = TRUE)
 
-kable(evolution_metiers, caption = "Métiers incluant le terme 'données' dans les facteurs d'évolution à moyen terme")
+evolution_metiers_extrait <- evolution_metiers %>%
+  select (referens_intitule, bap, referens_fap, referens_cs, somme)
+
+  kable(evolution_metiers_extrait, caption = "Métiers où 'données' apparaît comme facteur d'évolution moyen terme") 
 ```
+
+Dans ces BAP liés à l'administration centrale, on remarque l'absence de la BAP J et la quasi-absence de la BAP G, dont aucun métier ne prend la donnée en compte pour leur évolution moyen terme. Pourtant, les entretiens que nous avons menés montrent que ces domaines de la gestion du patrimoine immobilier et du pilotage sont fortement amenés à évoluer dans le contexte de la donnée.
 
 ## Regarder les métiers où "données" apparaît comme "intitulé précédent" et a disparu de l'intitulé actuel
 
