@@ -29,7 +29,21 @@ denombrement <- data %>%
 data_filtered <- data %>%
   filter(Id %in% denombrement$Id) %>%
   mutate(Id = as.character(Id)) %>%
-  left_join(denombrement %>% select(Id, somme), by = "Id") 
+  left_join(denombrement %>% select(Id, somme), by = "Id") %>%
+  arrange(desc(somme))
+
+# Classer les corps dans l'ordre hiérarchique
+ordre_corps <- c("ATRF", "TECH", "AI", "IE", "IR")
+
+data_filtered %>%
+  mutate(referens_id = fct_reorder(referens_id, -somme),
+         referens_cs=factor(referens_cs, levels = ordre_corps)) %>%
+  ggplot(aes(x = referens_id, y = somme, color=referens_cs)) +
+  geom_point() +
+  labs(y = "Nombre d'occurrences", color="Corps") +
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
 
 # Histogramme des variables où apparaissent le plus l'expression "données"
   
@@ -73,9 +87,6 @@ BAP_filtered_pourcentage %>%
 
 # Histogramme des corps où apparaissent le plus l'expression "données"
 
-# Classer les corps dans l'ordre hiérarchique
-ordre_corps <- c("ATRF", "TECH", "AI", "IE", "IR")
-
 corps_filtered <- data_filtered %>%
   count(referens_cs) %>%
   arrange(desc(n))
@@ -113,11 +124,46 @@ intitule_filtered <- data_filtered %>%
 
 View(intitule_filtered)
 
-# Afficher les top profil-types qui contiennent l'expression "données"
+## Regarder les métiers qui concentrent le plus le terme "données"
 
-# Regarder les métiers types où "données" apparaît dans referens_facteur_d_evolution_moyen_terme
+data_filtered %>%
+  filter(somme > 10) %>%
+  arrange(desc(somme)) %>%
+  select (referens_intitule, referens_metiers, bap, referens_fap, referens_cs, somme) %>%
+  head(15)
 
-# Faire un kwic
+## Regarder les métiers où "données" apparaît dans facteur_d_evolution_moyen_terme
 
-# Tout refaire en booléen au lieu du dénombrement (str_select au lieu de str_count)
+evolution_metiers <- data %>%
+  filter(Id %in% denombrement$Id) %>%
+  filter(denombrement$referens_facteurs_d_evolution_moyen_terme >0) %>%
+  mutate(Id = as.character(Id)) %>%
+  left_join(denombrement %>% select(Id, somme), by = "Id")
 
+# Il y a un problème avec la ligne "Id = 34" qui apparaît alors que denombrement[34,"referens_facteurs_d_evolution_moyen_terme"] == NULL 0
+
+## Regarder les métiers où le terme données apparaît comme "intitulé précédent" et a disparu de l'intitulé actuel 
+
+suppression_metiers <- data %>%
+  filter(Id %in% denombrement$Id) %>%
+  filter(denombrement, referens_intitule_precedent > 0) %>%
+  filter(denombrement, referens_intitule == 0) %>%
+  mutate(Id = as.character(Id)) %>%
+  left_join(denombrement %>% select(Id, somme), by = "Id") %>%
+  arrange(desc(somme)) %>%
+  select(referens_intitule, bap, referens_fap, referens_facteurs_d_evolution_moyen_terme, referens_cs) %>%
+  group_by(bap) %>%
+  arrange(referens_cs, .by_group = TRUE)
+
+kable(evolution_metiers, caption = "Métiers dont l'ancien intitulé incluait le terme 'données' mais pas l'intitulé actuel")
+
+## boxplot (quartiles) de la distribution des fiches métiers qui concentrent le plus le terme 'données" par corps
+
+data_filtered %>%
+  mutate(referens_cs=factor(referens_cs, levels = ordre_corps)) %>%
+  ggplot(aes(x = referens_cs, y = somme, color=referens_cs)) +
+  geom_boxplot()+
+  geom_jitter(shape=16, position=position_jitter (0.2)) +
+  labs(x= "Corps", y = "Nombre d'occurrences", color="Corps")+
+  theme(legend.position = "none")
+## Afficher le terme "données" en kwic (keyword-in-context) et représenter son voisinnage lexical

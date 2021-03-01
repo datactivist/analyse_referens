@@ -364,7 +364,7 @@ intitule_filtered &lt;- data_filtered %&gt;%
   group_by(bap) %&gt;%
   arrange(referens_cs, .by_group = TRUE)</code></pre>
 <table>
-<caption>Fiches métiers faisant apparaître le terme ‘données’ dans leur intitulé ou équivalent</caption>
+<caption>Fiches métiers incluant le terme ‘données’ dans leur intitulé ou équivalent</caption>
 <colgroup>
 <col width="27%" />
 <col width="14%" />
@@ -467,12 +467,107 @@ intitule_filtered &lt;- data_filtered %&gt;%
 <h1>TO DO</h1>
 <div id="regarder-les-métiers-qui-concentrent-le-plus-le-terme-données" class="section level2">
 <h2>Regarder les métiers qui concentrent le plus le terme “données”</h2>
+<table>
+<caption>Fiches métiers incluant au moins 15 fois le terme ‘données’</caption>
+<colgroup>
+<col width="16%" />
+<col width="56%" />
+<col width="12%" />
+<col width="10%" />
+<col width="2%" />
+<col width="1%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">referens_intitule</th>
+<th align="left">referens_metiers</th>
+<th align="left">bap</th>
+<th align="left">referens_fap</th>
+<th align="left">referens_cs</th>
+<th align="right">somme</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Ingénieur-e de recherche en production, traitement et analyse de données</td>
+<td align="left"></td>
+<td align="left">BAP D - Sciences Humaines et Sociales</td>
+<td align="left">Production, traitement et analyse des données</td>
+<td align="left">IR</td>
+<td align="right">35</td>
+</tr>
+<tr class="even">
+<td align="left">Ingénieur-e d’études en production, traitement, analyse de données et enquêtes</td>
+<td align="left"></td>
+<td align="left">BAP D - Sciences Humaines et Sociales</td>
+<td align="left">Production, traitement et analyse des données</td>
+<td align="left">IE</td>
+<td align="right">29</td>
+</tr>
+<tr class="odd">
+<td align="left">Technicien-ne en production, traitement de données et enquêtes</td>
+<td align="left"></td>
+<td align="left">BAP D - Sciences Humaines et Sociales</td>
+<td align="left">Production, traitement et analyse des données</td>
+<td align="left">TECH</td>
+<td align="right">25</td>
+</tr>
+<tr class="even">
+<td align="left">Assistant-e ingénieur-e en production, traitement de données et enquêtes</td>
+<td align="left"></td>
+<td align="left">BAP D - Sciences Humaines et Sociales</td>
+<td align="left">Production, traitement et analyse des données</td>
+<td align="left">AI</td>
+<td align="right">24</td>
+</tr>
+<tr class="odd">
+<td align="left">Assistant-e ingénieur-e biologiste en traitement de données</td>
+<td align="left"></td>
+<td align="left">BAP A - Sciences du vivant, de la terre et de l’environnement</td>
+<td align="left">Biologie et santé, Sciences de la vie et de la terre</td>
+<td align="left">AI</td>
+<td align="right">23</td>
+</tr>
+<tr class="even">
+<td align="left">Assistant-e statisticien-ne</td>
+<td align="left"></td>
+<td align="left">BAP E - Informatique, Statistiques et Calcul scientifique</td>
+<td align="left">Statistiques</td>
+<td align="left">AI</td>
+<td align="right">21</td>
+</tr>
+<tr class="odd">
+<td align="left">Administrateur-trice de bases de données / Intégrateur d’applications</td>
+<td align="left">administrateur de bases de données (dba)</td>
+<td align="left">BAP E - Informatique, Statistiques et Calcul scientifique</td>
+<td align="left">Ingénierie technique et de production</td>
+<td align="left">IE</td>
+<td align="right">20</td>
+</tr>
+<tr class="even">
+<td align="left">Ingénieur-e statisticien-ne</td>
+<td align="left">Ingénieur dans un laboratoire en appui d’une équipe de recherche dont le thème nécessite des traitements statistiques|Ingénieur chargé d’organiser et de mettre en œuvre les traitements statistiques dans un service ou une cellule chargée des statistiques d’un établissement</td>
+<td align="left">BAP E - Informatique, Statistiques et Calcul scientifique</td>
+<td align="left">Statistiques</td>
+<td align="left">IE</td>
+<td align="right">17</td>
+</tr>
+<tr class="odd">
+<td align="left">Ingénieur-e d’études en sciences de l’information géographique</td>
+<td align="left"></td>
+<td align="left">BAP D - Sciences Humaines et Sociales</td>
+<td align="left">Sciences de l’information géographique</td>
+<td align="left">IE</td>
+<td align="right">15</td>
+</tr>
+</tbody>
+</table>
 </div>
 <div id="regarder-les-métiers-où-données-apparaît-dans-facteur_d_evolution_moyen_terme" class="section level2">
 <h2>Regarder les métiers où “données” apparaît dans facteur_d_evolution_moyen_terme</h2>
 </div>
-<div id="regarder-les-métiers-où-le-terme-données-apparaît-comme-intitulé-précédent-et-pas-dans-lintitulé-actuel" class="section level2">
-<h2>Regarder les métiers où le terme données apparaît comme “intitulé précédent” et pas dans l’intitulé actuel</h2>
+<div id="regarder-les-métiers-où-le-terme-données-apparaît-comme-intitulé-précédent-et-a-disparu-de-lintitulé-actuel" class="section level2">
+<h2>Regarder les métiers où le terme données apparaît comme “intitulé précédent” et a disparu de l’intitulé actuel</h2>
 </div>
 <div id="afficher-le-terme-données-en-kwic-keyword-in-context-et-représenter-son-voisinnage-lexical" class="section level2">
 <h2>Afficher le terme “données” en kwic (keyword-in-context) et représenter son voisinnage lexical</h2>

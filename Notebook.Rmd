@@ -3,8 +3,8 @@ title: "Analyse des données RéFérens III"
 author: "Antoine Blanchard"
 date: "24/02/2021"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -61,10 +61,30 @@ denombrement <- data %>%
 data_filtered <- data %>%
   filter(Id %in% denombrement$Id) %>%
   mutate(Id = as.character(Id)) %>%
-  left_join(denombrement %>% select(Id, somme), by = "Id")
+  left_join(denombrement %>% select(Id, somme), by = "Id") %>%
+  arrange(desc(somme))
 ```
 
 # Analyse des données
+
+On trace la distribution des `r nrow(data_filtered)` fiches métiers selon le nombre de fois où apparaît le terme "données" :
+
+```{r distribution_corps, results ='asis'}
+# Classer les corps dans l'ordre hiérarchique
+ordre_corps <- c("ATRF", "TECH", "AI", "IE", "IR")
+
+data_filtered %>%
+    mutate(referens_id = fct_reorder(referens_id, -somme),
+         referens_cs=factor(referens_cs, levels = ordre_corps)) %>%
+  ggplot(aes(x = referens_id, y = somme, color=referens_cs)) +
+  geom_point() +
+  labs(y = "Nombre d'occurrences", color="Corps") +
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
+```
+
+On retrouve une distribution fortement asymétrique.
 
 ## Fréquence de l'expression "données" par champ
 
@@ -86,7 +106,7 @@ denombrement %>%
   theme(legend.position = "none")
 ```
 
-Comme on pouvait s'y attendre, le terme données apparaît le plus dans les champs des fiches métiers qui décrivent les compétences opérationnelles (rang 1) et les activités principales (rang 2). Il apparaît assez peu dans l'intitulé des fiches métiers (voir plus loin pour une analyse détaillée), qui est au 9e rang, précédé du champ "intitulé précédent" qui mérite d'être creusé pour comprendre pourquoi certaines occurrences ont disparu. Au 6e rang, donc assez haut, on trouve le champ "Factures d'évolution à moyen terme" du métier qui vise, selon la documentation de RéFérens, à identifier les facteurs clés et en déduire leur impact qualitatif sur le métier.
+Comme on pouvait s'y attendre, le terme données apparaît le plus dans les champs des fiches métiers qui décrivent les compétences opérationnelles (rang 1) et les activités principales (rang 2). Il apparaît assez peu dans l'intitulé des fiches métiers (voir plus loin pour une analyse détaillée), qui est au 9e rang, précédé du champ "intitulé précédent" qui mérite d'être creusé pour comprendre pourquoi certaines occurrences ont disparu. Au 6e rang, donc assez haut, on trouve le champ "Facteurs d'évolution à moyen terme" du métier qui vise, selon la documentation de RéFérens, à identifier les facteurs clés et en déduire leur impact qualitatif sur le métier.
 
 
 ## Fréquence de l'expression "données" par BAP
@@ -124,8 +144,6 @@ On constate que les BAP E et D possèdent en proportion la plus grande part de m
 Proportion des fiches métiers qui contiennent l'expression "données" par corps :
 
 ```{r frequence_par_corps}
-# Classer les corps dans l'ordre hiérarchique
-ordre_corps <- c("ATRF", "TECH", "AI", "IE", "IR")
 
 corps_filtered <- data_filtered %>%
   count(referens_cs) %>%
@@ -169,14 +187,66 @@ intitule_filtered <- data_filtered %>%
 ```
 
 ```{r intitule_filtered, echo = FALSE, results ='asis'}
-kable(intitule_filtered, caption = "Fiches métiers faisant apparaître le terme 'données' dans leur intitulé ou équivalent")
+kable(intitule_filtered, caption = "Métiers incluant le terme 'données' dans leur intitulé")
 ```
 
+## Métiers qui concentrent le plus le terme "données"
+
+On classe les métiers qui concentrent le plus le terme "données" et on affiche ceux où le terme apparaît 15 fois ou plus :
+
+```{r top_metiers, results ='asis'}
+top_metiers <- data_filtered %>%
+  filter(somme >= 15) %>%
+  arrange(desc(somme)) %>%
+  select (referens_intitule, bap, referens_fap, referens_cs, somme)
+
+kable(top_metiers, caption = "Métiers incluant au moins 15 fois le terme 'données'")
+```
+
+On constate que ce sont beaucoup de métiers AI, beaucoup en soutien à la recherche. Hypothèse : on a vu que les corps IE et IR possèdent proportionnellement plus de métiers liés **aux** données, mais est-ce que les corps ATRF, TECH et AI possèdent proportionnellement plus de métiers **des** données (c'est-à-dire où le terme apparaît le plus fréquemment) ?
+
 # TO DO
-## Regarder les métiers qui concentrent le plus le terme "données"
+
+## Boxplot de la distribution des fiches métiers par corps
+
+```{r boxplot_corps, results ='asis'}
+data_filtered %>%
+      mutate(referens_cs=factor(referens_cs, levels = ordre_corps)) %>%
+  ggplot(aes(x = referens_cs, y = somme, color=referens_cs)) +
+    geom_boxplot()+
+  geom_jitter(shape=16, position=position_jitter (0.2)) +
+    labs(x= "Corps", y = "Nombre d'occurrences", color="Corps")+
+  theme(legend.position = "none")
+```
 
 ## Regarder les métiers où "données" apparaît dans facteur_d_evolution_moyen_terme
 
-## Regarder les métiers où le terme données apparaît comme "intitulé précédent" et pas dans l'intitulé actuel 
+```{r evolution_metiers, results ='asis'}
+evolution_metiers <- data %>%
+  filter(Id %in% denombrement$Id) %>%
+  filter(denombrement$referens_facteur_d_evolution_moyen_terme >0) %>%
+  mutate(Id = as.character(Id)) %>%
+  left_join(denombrement %>% select(Id, somme), by = "Id")
 
-## Afficher le terme "données" en kwic (keyword-in-context) et représenter son voisinnage lexical
+kable(evolution_metiers, caption = "Métiers incluant le terme 'données' dans les facteurs d'évolution à moyen terme")
+```
+
+## Regarder les métiers où "données" apparaît comme "intitulé précédent" et a disparu de l'intitulé actuel
+
+```{r suppression_metiers, results ='asis'}
+suppression_metiers <- data %>%
+    filter(Id %in% denombrement$Id) %>%
+    filter(denombrement$referens_intitule_precedent >0) %>%
+    filter(denombrement$referens_intitule == 0) %>%
+  mutate(Id = as.character(Id)) %>%
+  left_join(denombrement %>% select(Id, somme), by = "Id") %>%
+  arrange(desc(somme)) %>%
+  select(referens_intitule, bap, referens_fap, referens_intitule_precedent, referens_cs) %>%
+  group_by(bap)
+
+kable(evolution_metiers, caption = "Métiers dont l'ancien intitulé incluait le terme 'données' mais pas l'intitulé actuel")
+```
+
+## Afficher le terme "données" en kwic (keyword-in-context) et représenter son voisinage lexical (qualificatifs, verbes relatifs à des processus managériaux…)
+
+## Répéter les étapes avec le terme "archives"
