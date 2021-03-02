@@ -3,8 +3,10 @@ title: "Analyse des données RéFérens III"
 author: "Antoine Blanchard"
 date: "01/03/2021"
 output:
-  pdf_document: default
+  github_document:
+   toc: true
   html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
