@@ -1,4 +1,4 @@
-# Analyse RéFéRens
+# Analyse RéFérens
 
 L'objectif de cette recherche, menée avec Romain Pierronnet (Institut de Recherche en Gestion (Université Gustave Eiffel – Université Paris-Est Créteil) et Adoc Mètis) est d'étudier en quoi le développement d’une culture partagée de la donnée interroge plus globalement l’ensemble du management des établissements d’enseignement supérieur et de recherche (ESR).
 
