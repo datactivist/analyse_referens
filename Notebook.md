@@ -7,22 +7,24 @@ Antoine Blanchard
     RéFérens](#import-du-référentiel-métier-référens)
 -   [Transformation des données](#transformation-des-données)
 -   [Analyse des données](#analyse-des-données)
-    -   [Fréquence de l’expression “données” par
-        champ](#fréquence-de-lexpression-données-par-champ)
+    -   [Distribution des fiches
+        métiers](#distribution-des-fiches-métiers)
+    -   [Occurrences de l’expression “données” par
+        champ](#occurrences-de-lexpression-données-par-champ)
     -   [Liste des 11 métiers dont l’intitulé contient l’expression
         “données”](#liste-des-11-métiers-dont-lintitulé-contient-lexpression-données)
-    -   [Fréquence de l’expression “données” par
-        BAP](#fréquence-de-lexpression-données-par-bap)
-    -   [Fréquence de l’expression “données” par
-        corps](#fréquence-de-lexpression-données-par-corps)
+    -   [Occurrences de l’expression “données” par
+        BAP](#occurrences-de-lexpression-données-par-bap)
+    -   [Occurrences de l’expression “données” par
+        corps](#occurrences-de-lexpression-données-par-corps)
     -   [Fréquence de l’expression “données” par BAP et par
         corps](#fréquence-de-lexpression-données-par-bap-et-par-corps)
     -   [Liste des métiers IE de la BAP F liés aux
         données](#liste-des-métiers-ie-de-la-bap-f-liés-aux-données)
     -   [Métiers qui concentrent le plus le terme
         “données”](#métiers-qui-concentrent-le-plus-le-terme-données)
-    -   [Distribution des fiches métiers par
-        corps](#distribution-des-fiches-métiers-par-corps)
+    -   [Dispersion des fiches métiers par
+        corps](#dispersion-des-fiches-métiers-par-corps)
     -   [Métiers des BAP E, F, G, J où “données” apparaît comme facteur
         d’évolution moyen
         terme](#métiers-des-bap-e-f-g-j-où-données-apparaît-comme-facteur-dévolution-moyen-terme)
@@ -96,6 +98,8 @@ data_filtered <- data %>%
 
 # Analyse des données
 
+## Distribution des fiches métiers
+
 On trace la distribution des 154 fiches métiers selon le nombre de fois
 où apparaît le terme “données” :
 
@@ -108,7 +112,10 @@ data_filtered %>%
          referens_cs=factor(referens_cs, levels = ordre_corps)) %>%
   ggplot(aes(x = referens_id, y = somme, color=referens_cs)) +
   geom_point() +
-  labs(y = "Nombre d'occurrences", color="Corps") +
+  labs(x="Rang", y="Nombre d'occurrences du terme ''données''", color="Corps",
+       title="Distribution des fiches métiers",
+       caption="Données MESRI – Visualisation CC-BY Antoine Blanchard / Datactivist") +
+  theme_ipsum() +
   theme(axis.title.x=element_blank(),
         axis.text.x=element_blank(),
         axis.ticks.x=element_blank())
@@ -118,10 +125,10 @@ data_filtered %>%
 
 On observe une distribution fortement asymétrique.
 
-## Fréquence de l’expression “données” par champ
+## Occurrences de l’expression “données” par champ
 
-Dans quelles colonnes du jeu de données trouve-t-on le plus le terme
-“données” ?
+Dans quelles colonnes du jeu de données (variable) trouve-t-on le plus
+le terme “données” ?
 
 ``` r
 denombrement %>%
@@ -133,9 +140,10 @@ denombrement %>%
   filter(somme > 0) %>%
   ggplot(aes(x=fct_reorder(variable, somme), y = somme)) +
   geom_col(aes(fill = variable), color = "grey50") +
-  labs(x = "", y = "Nombre d'occurrences")+
+  labs(x = "", y = "Nombre d'occurrences du terme ''données''",
+       caption="Données MESRI – Visualisation CC-BY Antoine Blanchard / Datactivist")+
   coord_flip()+
-  theme_classic() +
+  theme_ipsum() +
   theme(legend.position = "none")
 ```
 
@@ -186,7 +194,7 @@ kable(intitule_filtered, caption = "Métiers incluant le terme 'données' dans l
 
 Métiers incluant le terme ‘données’ dans leur intitulé
 
-## Fréquence de l’expression “données” par BAP
+## Occurrences de l’expression “données” par BAP
 
 Proportion des fiches métiers qui contiennent l’expression “données” par
 BAP :
@@ -207,9 +215,12 @@ BAP_filtered_pourcentage <- BAP_filtered %>%
 BAP_filtered_pourcentage %>%
   ggplot(aes(x = bap, y = pourcentage_bap)) +
   geom_col(aes(fill = bap), color = "grey50") +
-  labs(x = "", y = "Proportion de fiches métiers contenant ''données'' par BAP") +
+  labs(x = "", y = "Proportion",
+       title="Proportion de fiches métiers liées aux ''données'' par BAP",
+    caption="Données MESRI – Visualisation CC-BY Antoine Blanchard / Datactivist") +
+  theme_ipsum() +
   coord_flip() +
-  theme_classic() +
+  theme_ipsum(grid="X") +
   theme(legend.position = "none") +
   scale_fill_manual(values = brewer.pal(8, "YlOrRd")) +
   scale_y_continuous(labels = scales::percent, limits = c(0,1))
@@ -224,7 +235,7 @@ directement le soutien à la recherche, sont moins concernés par les
 données que les BAP F et J qui sont liés à l’administration de
 l’université et se retrouvent plutôt dans l’administration centrale.
 
-## Fréquence de l’expression “données” par corps
+## Occurrences de l’expression “données” par corps
 
 Proportion des fiches métiers qui contiennent l’expression “données” par
 corps :
@@ -245,9 +256,11 @@ corps_filtered_pourcentage <- corps_filtered %>%
 corps_filtered_pourcentage %>%
   ggplot(aes(x = referens_cs, y = pourcentage_corps)) +
   geom_col(aes(fill = referens_cs), color = "grey50") +
-  labs(x = "", y = "Proportion de fiches métiers contenant ''données'' par corps") +
+  labs(x = "Corps", y = "Proportion",
+       title="Proportion de fiches métiers liées aux ''données'' par corps",
+      caption="Données MESRI – Visualisation CC-BY Antoine Blanchard / Datactivist") +
   coord_flip() +
-  theme_classic() +
+  theme_ipsum(grid="X") +
   theme(legend.position = "none") +
   scale_y_continuous(labels = scales::percent, limits = c(0,1))
 ```
@@ -265,7 +278,10 @@ data_filtered %>%
       mutate(referens_cs=factor(referens_cs, levels = ordre_corps)) %>%
   ggplot(aes(x = referens_bap_id, fill=referens_cs)) +
     geom_bar() +
-      labs(x= "BAP", y = "Nombre de fiches métiers", fill="Corps")
+      labs(x= "BAP", y = "Nombre de fiches métiers", fill="Corps",
+           title="Nombre de fiches métiers liées aux données par corps et par BAP",
+         caption="Données MESRI – Visualisation CC-BY Antoine Blanchard / Datactivist") +
+theme_ipsum(grid="Y")
 ```
 
 ![](Notebook_files/figure-gfm/stack_corps-1.png)<!-- -->
@@ -340,10 +356,10 @@ proportionnellement plus de métiers liés **aux** données, mais dans
 quels corps trouve-t-on les métiers **des** données (c’est-à-dire où le
 terme apparaît le plus fréquemment) ?
 
-## Distribution des fiches métiers par corps
+## Dispersion des fiches métiers par corps
 
-On trace la distribution des fiches métiers par corps, avec une
-représentation par boxplot :
+On trace la dispersion des fiches métiers par corps selon les
+occurrences du mot “données”, avec une représentation par boxplot :
 
 ``` r
 data_filtered %>%
@@ -351,14 +367,17 @@ data_filtered %>%
   ggplot(aes(x = referens_cs, y = somme, color=referens_cs)) +
     geom_boxplot()+
   geom_jitter(shape=16, position=position_jitter (0.2)) +
-    labs(x= "Corps", y = "Nombre d'occurrences", color="Corps")+
-  theme(legend.position = "none")
+    labs(x= "Corps", y = "Nombre d'occurrences du terme ''données''", color="Corps",
+         title="Dispersion des fiches métiers liées aux données par corps",
+         caption="Données MESRI – Visualisation CC-BY Antoine Blanchard / Datactivist") +
+  theme_ipsum() +
+    theme(legend.position = "none")
 ```
 
 ![](Notebook_files/figure-gfm/boxplot_corps-1.png)<!-- -->
 
 Il apparaît que les corps IE et IR ont la distribution la plus étirée
-par le haut, ce sont ceux où l’on trouve le plus les métiers **des**
+vers le haut, ce sont ceux où l’on trouve le plus de métiers **des**
 données.
 
 ## Métiers des BAP E, F, G, J où “données” apparaît comme facteur d’évolution moyen terme
