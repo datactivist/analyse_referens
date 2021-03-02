@@ -43,60 +43,12 @@ RéFérens (REFérentiel des Emplois-types de la recherche et de
 l’Enseignement Supérieur) version III est [fourni par le Ministère de
 l’enseignement supérieur, de la recherche et de
 l’innovation](https://www.data.gouv.fr/fr/datasets/referentiel-metiers-referens-iii-pour-la-filiere-des-itrf-1/),
-sur leur portail open data. On l’importe et on liste l’ensemble de ses
-variables (colonnes) :
+sur leur portail open data. On l’importe :
 
 ``` r
 data <- read.csv2("fr-esr_referentiel_metier_referens_3.csv") %>%
   mutate(Id = row_number())
-names(data) #noms de colonnes
-```
 
-    ##  [1] "referens_bap_id"                                         
-    ##  [2] "referens_bap"                                            
-    ##  [3] "referens_fap"                                            
-    ##  [4] "referens_fap_rattachement"                               
-    ##  [5] "referens_cs_id"                                          
-    ##  [6] "referens_cs"                                             
-    ##  [7] "referens_cs_lib"                                         
-    ##  [8] "referens_domaine_formation"                              
-    ##  [9] "referens_metiers"                                        
-    ## [10] "referens_mission"                                        
-    ## [11] "referens_fap_reme"                                       
-    ## [12] "referens_activites_principales"                          
-    ## [13] "referens_conditions"                                     
-    ## [14] "referens_connaissances"                                  
-    ## [15] "referens_competences_operationnelles"                    
-    ## [16] "referens_competences_comportementales"                   
-    ## [17] "referens_prerequis"                                      
-    ## [18] "referens_facteurs_d_evolution_moyen_terme"               
-    ## [19] "referens_impacts"                                        
-    ## [20] "referens_id"                                             
-    ## [21] "referens_intitule"                                       
-    ## [22] "referens_id_precedent"                                   
-    ## [23] "referens_intitule_precedent"                             
-    ## [24] "tricarto"                                                
-    ## [25] "referens_fap_id"                                         
-    ## [26] "referens_experience"                                     
-    ## [27] "trifap"                                                  
-    ## [28] "referens_categorie_emploi"                               
-    ## [29] "referens_type_id_precedent"                              
-    ## [30] "referens_type_precedent"                                 
-    ## [31] "referens_programme_du_concours_externe_fichier"          
-    ## [32] "referens_programme_du_concours_externe"                  
-    ## [33] "referens_programme_du_concours_externe_classe_normale"   
-    ## [34] "referens_programme_du_concours_externe_classe_superieure"
-    ## [35] "fiche_url"                                               
-    ## [36] "fiche_pdf"                                               
-    ## [37] "referens_connaissances_definitions"                      
-    ## [38] "referens_competences_operationnelles_definitions"        
-    ## [39] "referens_competences_comportementales_definitions"       
-    ## [40] "competences_id"                                          
-    ## [41] "bap"                                                     
-    ## [42] "fap"                                                     
-    ## [43] "Id"
-
-``` r
 variables <- data %>%
   select(-Id) %>%
   colnames()
@@ -190,15 +142,15 @@ denombrement %>%
 ![](Notebook_files/figure-gfm/frequence_par_variable-1.png)<!-- -->
 
 Comme on pouvait s’y attendre, le terme données apparaît le plus dans
-les champs des fiches métiers qui décrivent les compétences
-opérationnelles (rang 1) et les activités principales (rang 2). Il
-apparaît assez peu dans l’intitulé des fiches métiers (voir ci-après),
-qui est au 9e rang, précédé du champ “intitulé précédent” qui mérite
-d’être creusé pour comprendre pourquoi certaines occurrences ont disparu
-(voir plus loin). Au 6e rang, donc assez haut, on trouve le champ
-“Facteurs d’évolution à moyen terme” du métier qui vise, selon la
-documentation de RéFérens, à identifier les facteurs clés et en déduire
-leur impact qualitatif sur le métier.
+les champs qui décrivent les compétences opérationnelles (rang 1) et les
+activités principales (rang 2) des fiches métiers. Il apparaît assez peu
+dans l’intitulé des fiches métiers (voir ci-après), qui est au 9e rang,
+précédé du champ “intitulé précédent” qui mérite d’être creusé pour
+comprendre pourquoi certaines occurrences ont disparu (voir plus loin).
+Au 6e rang, donc assez haut, on trouve le champ “Facteurs d’évolution à
+moyen terme” du métier qui vise, selon la documentation de RéFérens, à
+identifier les facteurs clés et en déduire leur impact qualitatif sur le
+métier.
 
 ## Liste des 11 métiers dont l’intitulé contient l’expression “données”
 
@@ -318,12 +270,12 @@ data_filtered %>%
 
 ![](Notebook_files/figure-gfm/stack_corps-1.png)<!-- -->
 
-En valeur absolue, le BAP F Culture, Communication, Production et
+En valeur absolue, la BAP F Culture, Communication, Production et
 diffusion des savoirs concentre le plus grand nombre de fiches métiers
 liées aux données, grâce à un nombre très important de métiers
 appartenant au corps des IE.
 
-Nous voulons savoir quels sont ces métiers IE de la BAP F :
+Nous voulons savoir quels sont ces métiers IE de la BAP F.
 
 ## Liste des métiers IE de la BAP F liés aux données
 
@@ -383,7 +335,7 @@ kable(top_metiers, caption = "Métiers incluant au moins 15 fois le terme 'donn�
 Métiers incluant au moins 15 fois le terme ‘données’
 
 On constate que ce sont beaucoup de métiers AI, beaucoup en soutien à la
-recherche. Hypothèse : on a vu que les corps IE et IR possèdent
+recherche. Question : on a vu que les corps IE et IR possèdent
 proportionnellement plus de métiers liés **aux** données, mais dans
 quels corps trouve-t-on les métiers **des** données (c’est-à-dire où le
 terme apparaît le plus fréquemment) ?

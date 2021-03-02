@@ -24,12 +24,11 @@ library(knitr, quietly = TRUE)
 
 ## Import du référentiel métier RéFérens
 
-RéFérens (REFérentiel des Emplois-types de la recherche et de l’Enseignement Supérieur) version III est [fourni par le Ministère de l'enseignement supérieur, de la recherche et de l'innovation](https://www.data.gouv.fr/fr/datasets/referentiel-metiers-referens-iii-pour-la-filiere-des-itrf-1/), sur leur portail open data. On l'importe et on liste l'ensemble de ses variables (colonnes) :
+RéFérens (REFérentiel des Emplois-types de la recherche et de l’Enseignement Supérieur) version III est [fourni par le Ministère de l'enseignement supérieur, de la recherche et de l'innovation](https://www.data.gouv.fr/fr/datasets/referentiel-metiers-referens-iii-pour-la-filiere-des-itrf-1/), sur leur portail open data. On l'importe :
 
 ```{r data}
 data <- read.csv2("fr-esr_referentiel_metier_referens_3.csv") %>%
   mutate(Id = row_number())
-names(data) #noms de colonnes
 
 variables <- data %>%
   select(-Id) %>%
@@ -108,7 +107,7 @@ denombrement %>%
   theme(legend.position = "none")
 ```
 
-Comme on pouvait s'y attendre, le terme données apparaît le plus dans les champs des fiches métiers qui décrivent les compétences opérationnelles (rang 1) et les activités principales (rang 2). Il apparaît assez peu dans l'intitulé des fiches métiers (voir ci-après), qui est au 9e rang, précédé du champ "intitulé précédent" qui mérite d'être creusé pour comprendre pourquoi certaines occurrences ont disparu (voir plus loin). Au 6e rang, donc assez haut, on trouve le champ "Facteurs d'évolution à moyen terme" du métier qui vise, selon la documentation de RéFérens, à identifier les facteurs clés et en déduire leur impact qualitatif sur le métier.
+Comme on pouvait s'y attendre, le terme données apparaît le plus dans les champs qui décrivent les compétences opérationnelles (rang 1) et les activités principales (rang 2) des fiches métiers. Il apparaît assez peu dans l'intitulé des fiches métiers (voir ci-après), qui est au 9e rang, précédé du champ "intitulé précédent" qui mérite d'être creusé pour comprendre pourquoi certaines occurrences ont disparu (voir plus loin). Au 6e rang, donc assez haut, on trouve le champ "Facteurs d'évolution à moyen terme" du métier qui vise, selon la documentation de RéFérens, à identifier les facteurs clés et en déduire leur impact qualitatif sur le métier.
 
 ## Liste des 11 métiers dont l'intitulé contient l'expression "données"
 
@@ -198,9 +197,9 @@ data_filtered %>%
       labs(x= "BAP", y = "Nombre de fiches métiers", fill="Corps")
 ```
 
-En valeur absolue, le BAP F Culture, Communication, Production et diffusion des savoirs concentre le plus grand nombre de fiches métiers liées aux données, grâce à un nombre très important de métiers appartenant au corps des IE.
+En valeur absolue, la BAP F Culture, Communication, Production et diffusion des savoirs concentre le plus grand nombre de fiches métiers liées aux données, grâce à un nombre très important de métiers appartenant au corps des IE.
 
-Nous voulons savoir quels sont ces métiers IE de la BAP F :
+Nous voulons savoir quels sont ces métiers IE de la BAP F.
 
 ## Liste des métiers IE de la BAP F liés aux données
 
@@ -225,7 +224,7 @@ top_metiers <- data_filtered %>%
 kable(top_metiers, caption = "Métiers incluant au moins 15 fois le terme 'données'")
 ```
 
-On constate que ce sont beaucoup de métiers AI, beaucoup en soutien à la recherche. Hypothèse : on a vu que les corps IE et IR possèdent proportionnellement plus de métiers liés **aux** données, mais dans quels corps trouve-t-on les métiers **des** données (c'est-à-dire où le terme apparaît le plus fréquemment) ?
+On constate que ce sont beaucoup de métiers AI, beaucoup en soutien à la recherche. Question : on a vu que les corps IE et IR possèdent proportionnellement plus de métiers liés **aux** données, mais dans quels corps trouve-t-on les métiers **des** données (c'est-à-dire où le terme apparaît le plus fréquemment) ?
 
 ## Distribution des fiches métiers par corps
 
