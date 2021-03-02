@@ -4,4 +4,4 @@ L'objectif de cette recherche, menée avec Romain Pierronnet (Institut de Recher
 
 Pour cela, nous nous intéressons à la place qu'occupent les compétences de la donnée dans les processus de gestion des emplois et les processus de management à l'université. L'approche par métier type RéFérens permet de décrire les métiers les plus courants dans l'ESR français, et leur hiérarchisation.
 
-Le script principal est niché dans le document exécutable en Rmarkdown nommé "Notebook.rmd", et ses sorties sont disponibles au format HTML et PDF.
+Le script principal est niché dans le document exécutable en Rmarkdown nommé "Notebook.rmd", et ses sorties sont disponibles au format Markdown (à privilégier pour un affichage sur Github), HTML et PDF.
