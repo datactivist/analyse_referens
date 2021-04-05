@@ -279,7 +279,7 @@ data_filtered %>%
   ggplot(aes(x = referens_bap_id, fill=referens_cs)) +
     geom_bar() +
       labs(x= "BAP", y = "Nombre de fiches métiers", fill="Corps",
-           title="Nombre de fiches métiers liées aux données par corps et par BAP",
+           title="Nombre de fiches métiers liées aux données par corps et BAP",
          caption="Données MESRI – Visualisation CC-BY Antoine Blanchard / Datactivist") +
 theme_ipsum(grid="Y")
 ```
