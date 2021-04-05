@@ -85,18 +85,32 @@ data_filtered %>%
   geom_point() +
   labs(x="Rang", y="Nombre d'occurrences du terme ''données''", color="Corps",
        title="Distribution des fiches métiers",
-       caption="Données MESRI – Visualisation CC-BY Antoine Blanchard / Datactivist") +
+       caption="Données MESRI – Analyse CC-BY Antoine Blanchard / Datactivist") +
   theme_ipsum() +
   theme(axis.title.x=element_blank(),
         axis.text.x=element_blank(),
         axis.ticks.x=element_blank())
 ```
 
-On observe une distribution fortement asymétrique.
+On observe une distribution fortement asymétrique, avec un décrochement à y=17 et x=8.
+
+Voici les 8 métiers où le terme apparaît 17 fois ou plus :
+
+```{r top_metiers, results ='asis'}
+top_metiers <- data_filtered %>%
+  filter(somme >= 17) %>%
+  arrange(desc(somme)) %>%
+  select (referens_intitule, bap, referens_fap, referens_cs, somme, Id)
+
+kable(top_metiers, caption = "Métiers incluant au moins 17 fois le terme 'données'")
+```
+
+On constate que ce sont majoritairement des métiers AI et IE, majoritairement en soutien à la recherche (BAP A et D). 
+
 
 ## Occurrences de l'expression "données" par champ
 
-Dans quelles colonnes du jeu de données (variable) trouve-t-on le plus le terme "données" ?
+Dans quelles colonnes (variables) du jeu de données trouve-t-on le plus le terme "données" ?
 
 ```{r frequence_par_variable}
 denombrement %>%
@@ -109,7 +123,7 @@ denombrement %>%
   ggplot(aes(x=fct_reorder(variable, somme), y = somme)) +
   geom_col(aes(fill = variable), color = "grey50") +
   labs(x = "", y = "Nombre d'occurrences du terme ''données''",
-       caption="Données MESRI – Visualisation CC-BY Antoine Blanchard / Datactivist")+
+       caption="Données MESRI – Analyse CC-BY Antoine Blanchard / Datactivist")+
   coord_flip()+
   theme_ipsum() +
   theme(legend.position = "none")
@@ -134,6 +148,15 @@ intitule_filtered <- data_filtered %>%
 kable(intitule_filtered, caption = "Métiers incluant le terme 'données' dans leur intitulé")
 ```
 
+Ensemble, ces deux listes de métiers obtenues par deux méthodes différentes (que le terme apparaisse au moins 17 fois ou qu'il apparaisse dans l'intitulé) forment une liste de 13 métiers-types que l'on peut qualifier de "métiers des données".
+
+````{r metiers_des_donnees, message=FALSE, warning=FALSE}
+metiers_donnee <- full_join(intitule_filtered,top_metiers,by=c("referens_intitule","bap","referens_fap","referens_cs","Id"))  %>%
+  arrange(bap,referens_cs)
+
+kable(metiers_donnee, caption = "Métiers des données")
+```
+
 ## Occurrences de l'expression "données" par BAP
 
 Proportion des fiches métiers qui contiennent l'expression "données" par BAP :
@@ -156,7 +179,7 @@ BAP_filtered_pourcentage %>%
   geom_col(aes(fill = bap), color = "grey50") +
   labs(x = "", y = "Proportion",
        title="Proportion de fiches métiers liées aux ''données'' par BAP",
-    caption="Données MESRI – Visualisation CC-BY Antoine Blanchard / Datactivist") +
+    caption="Données MESRI – Analyse CC-BY Antoine Blanchard / Datactivist") +
   theme_ipsum() +
   coord_flip() +
   theme_ipsum(grid="X") +
@@ -189,8 +212,8 @@ corps_filtered_pourcentage %>%
   ggplot(aes(x = referens_cs, y = pourcentage_corps)) +
   geom_col(aes(fill = referens_cs), color = "grey50") +
   labs(x = "Corps", y = "Proportion",
-       title="Proportion de fiches métiers liées aux ''données'' par corps",
-      caption="Données MESRI – Visualisation CC-BY Antoine Blanchard / Datactivist") +
+       title="Proportion de fiches métiers liées aux ''données''\n par corps",
+      caption="Données MESRI – Analyse CC-BY Antoine Blanchard / Datactivist") +
   coord_flip() +
   theme_ipsum(grid="X") +
   theme(legend.position = "none") +
@@ -207,8 +230,8 @@ data_filtered %>%
   ggplot(aes(x = referens_bap_id, fill=referens_cs)) +
     geom_bar() +
       labs(x= "BAP", y = "Nombre de fiches métiers", fill="Corps",
-           title="Nombre de fiches métiers liées aux données par corps et BAP",
-         caption="Données MESRI – Visualisation CC-BY Antoine Blanchard / Datactivist") +
+           title="Nombre de fiches métiers liées aux données\n par corps et BAP",
+         caption="Données MESRI – Analyse CC-BY Antoine Blanchard / Datactivist") +
 theme_ipsum(grid="Y")
 ```
 
@@ -226,22 +249,9 @@ temp <- data_filtered %>%
   kable(temp, caption="Métiers IE de la BAP F liés aux données") 
 ```
 
-## Métiers qui concentrent le plus le terme "données"
-
-On classe les métiers qui concentrent le plus le terme "données" et on affiche ceux où le terme apparaît 15 fois ou plus :
-
-```{r top_metiers, results ='asis'}
-top_metiers <- data_filtered %>%
-  filter(somme >= 15) %>%
-  arrange(desc(somme)) %>%
-  select (referens_intitule, bap, referens_fap, referens_cs, somme, Id)
-
-kable(top_metiers, caption = "Métiers incluant au moins 15 fois le terme 'données'")
-```
-
-On constate que ce sont beaucoup de métiers AI, beaucoup en soutien à la recherche. Question : on a vu que les corps IE et IR possèdent proportionnellement plus de métiers liés **aux** données, mais dans quels corps trouve-t-on les métiers **des** données (c'est-à-dire où le terme apparaît le plus fréquemment) ?
-
 ## Dispersion des fiches métiers par corps
+
+Question : on a vu que les corps IE et IR possèdent proportionnellement plus de métiers liés **aux** données, mais dans quels corps trouve-t-on les métiers **des** données (c'est-à-dire où le terme apparaît le plus fréquemment) ?
 
 On trace la dispersion des fiches métiers par corps selon les occurrences du mot "données", avec une représentation par boxplot :
 
@@ -252,8 +262,8 @@ data_filtered %>%
     geom_boxplot()+
   geom_jitter(shape=16, position=position_jitter (0.2)) +
     labs(x= "Corps", y = "Nombre d'occurrences du terme ''données''", color="Corps",
-         title="Dispersion des fiches métiers liées aux données par corps",
-         caption="Données MESRI – Visualisation CC-BY Antoine Blanchard / Datactivist") +
+         title="Dispersion des fiches métiers liées aux données\n par corps",
+         caption="Données MESRI – Analyse CC-BY Antoine Blanchard / Datactivist") +
   theme_ipsum() +
     theme(legend.position = "none")
 ```
@@ -294,6 +304,8 @@ kable(suppression_metiers, caption = "Métiers dont l'ancien intitulé incluait 
 ```
 
 Dans le premier cas il s'agit d'une évolution des missions, dans le second cas de la substitution du terme "données" par "information". Il faudrait voir dans quelle mesure cette substitution est significative ou non.
+
+
 
 # TO DO
 

@@ -16,19 +16,8 @@ names(postes) #noms de colonnes
 
 str(postes)
 
-postes_filtered_intitule <- postes %>%
-  semi_join(intitule_filtered, by = c("EMPLOIS.TYPES" = "referens_intitule"))
-
-postes_filtered_densite <- postes %>%
-  semi_join(top_metiers, by = c("EMPLOIS.TYPES" = "referens_intitule"))
-
-postes_filtered <- union(postes_filtered_densite,postes_filtered_intitule)
-
-intitule_filtered <- intitule_filtered %>% select(Id)
-
-top_metiers <- top_metiers %>% select(Id)
-
-metiers_donnee_uniques <- union(intitule_filtered,top_metiers)
+postes_filtered <- postes %>%
+  semi_join(metiers_donnee, by = c("EMPLOIS.TYPES" = "referens_intitule"))
 
 chronologie <- postes_filtered %>% 
   group_by(année) %>%
@@ -39,6 +28,6 @@ chronologie %>%
   geom_point() +
   scale_y_continuous(limits=c(0,40)) +
   labs(x="Année", y="Nombre de postes ouverts au concours BIATSS",
-       title="Evolution des recrutements de titulaires\n pour 14 métiers des données",
-       caption="Données P.E. Turgo – Visualisation CC-BY Antoine Blanchard / Datactivist") +
+       title="Evolution des recrutements de titulaires\n pour 13 métiers des données",
+       caption="Données P.E. Turgo – Analyse CC-BY Antoine Blanchard / Datactivist") +
   theme_ipsum()
