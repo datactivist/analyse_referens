@@ -25,8 +25,9 @@ chronologie <- postes_filtered %>%
   summarise(somme =sum(NOMBRE.d.emplois))
 
 chronologie %>%
-  ggplot(aes(x = année, y = somme)) +
+  ggplot(aes(x = année, y = somme, label=somme)) +
   geom_point() +
+  geom_text(aes(label=somme), hjust=0, vjust=-1) +
   scale_y_continuous(limits=c(0,40)) +
   scale_x_discrete(drop=FALSE) +
   labs(x="Année", y="Nombre de postes ouverts au concours BIATSS",
