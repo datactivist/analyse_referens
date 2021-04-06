@@ -32,5 +32,5 @@ chronologie %>%
   scale_x_discrete(drop=FALSE) +
   labs(x="Année", y="Nombre de postes ouverts au concours BIATSS",
        title="Evolution des recrutements de titulaires\n pour 13 métiers des données",
-       caption="Données P.E. Turgo – Analyse CC-BY Antoine Blanchard / Datactivist") +
+       caption="Données 2019 manquantes\n Données P.E. Turgo – Analyse CC-BY Antoine Blanchard / Datactivist") +
   theme_ipsum()

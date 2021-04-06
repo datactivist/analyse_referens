@@ -21,6 +21,7 @@ library(tm, quietly = TRUE)
 library(RColorBrewer, quietly = TRUE)
 library(knitr, quietly = TRUE)
 library(hrbrthemes, quietly = TRUE)
+library(ggrepel, quietly = TRUE)
 ```
 
 ## Import du référentiel métier RéFérens
@@ -81,8 +82,9 @@ On trace la distribution des `r nrow(data_filtered)` fiches métiers selon le no
 data_filtered %>%
     mutate(referens_id = fct_reorder(referens_id, -somme),
          referens_cs=factor(referens_cs, levels = ordre_corps)) %>%
-  ggplot(aes(x = referens_id, y = somme, color=referens_cs)) +
+  ggplot(aes(x = referens_id, y = somme, color=referens_cs, label=somme)) +
   geom_point() +
+    geom_text_repel(box.padding=0.5,max.overlaps = Inf, aes(label=ifelse(somme>=17,somme,'')), show.legend=FALSE) +
   labs(x="Rang", y="Nombre d'occurrences du terme ''données''", color="Corps",
        title="Distribution des fiches métiers",
        caption="Données MESRI – Analyse CC-BY Antoine Blanchard / Datactivist") +
