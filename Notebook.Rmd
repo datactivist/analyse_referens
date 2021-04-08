@@ -22,6 +22,7 @@ library(RColorBrewer, quietly = TRUE)
 library(knitr, quietly = TRUE)
 library(hrbrthemes, quietly = TRUE)
 library(ggrepel, quietly = TRUE)
+library(cluster, quietly=TRUE)
 ```
 
 ## Import du référentiel métier RéFérens
@@ -94,9 +95,32 @@ data_filtered %>%
         axis.ticks.x=element_blank())
 ```
 
-On observe une distribution fortement asymétrique, avec un décrochement à y=17 et x=8.
+On observe une distribution fortement asymétrique, avec un décrochement à y=17.
 
-Voici les 8 métiers où le terme apparaît 17 fois ou plus :
+On étiquette les 8 métiers où le terme apparaît 17 fois ou plus :
+
+```{r distribution_corps_avec_intitule, results ='asis'}
+data_filtered %>%
+    mutate(referens_id = fct_reorder(referens_id, -somme),
+         referens_cs=factor(referens_cs, levels = ordre_corps)) %>%
+  ggplot(aes(x = referens_id, y = somme, color=referens_cs, label=referens_intitule)) +
+  geom_point() +
+    geom_text_repel(size=2.5,box.padding=0.5,max.overlaps = Inf,force=8, aes(label=ifelse(somme>=17,referens_intitule,'')), show.legend=FALSE,
+    nudge_x           = 0.2,
+    direction         = "both",
+    segment.size      = 0.2,
+    segment.curvature = -0.1,
+    segment.inflect=FALSE) +
+  labs(x="Rang", y="Nombre d'occurrences du terme ''données''", color="Corps",
+       title="Distribution des fiches métiers",
+       caption="Données MESRI – Analyse CC-BY Antoine Blanchard / Datactivist") +
+  theme_ipsum() +
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
+```
+
+Et sous forme de table :
 
 ```{r top_metiers, results ='asis'}
 top_metiers <- data_filtered %>%

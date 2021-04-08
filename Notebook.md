@@ -21,8 +21,6 @@ Antoine Blanchard
         corps](#fréquence-de-lexpression-données-par-bap-et-par-corps)
     -   [Liste des métiers IE de la BAP F liés aux
         données](#liste-des-métiers-ie-de-la-bap-f-liés-aux-données)
-    -   [Métiers qui concentrent le plus le terme
-        “données”](#métiers-qui-concentrent-le-plus-le-terme-données)
     -   [Dispersion des fiches métiers par
         corps](#dispersion-des-fiches-métiers-par-corps)
     -   [Métiers des BAP E, F, G, J où “données” apparaît comme facteur
@@ -89,9 +87,13 @@ denombrement <- data %>%
   filter(somme > 0) %>%
   arrange(desc(somme))
   
+# Classer les corps dans l'ordre hiérarchique
+ordre_corps <- c("ATRF", "TECH", "AI", "IE", "IR")
+
 data_filtered <- data %>%
   filter(Id %in% denombrement$Id) %>%
-  mutate(Id = as.character(Id)) %>%
+  mutate(Id = as.character(Id),
+         referens_cs=factor(referens_cs, levels = ordre_corps)) %>%
   left_join(denombrement %>% select(Id, somme), by = "Id") %>%
   arrange(desc(somme))
 ```
@@ -104,17 +106,15 @@ On trace la distribution des 154 fiches métiers selon le nombre de fois
 où apparaît le terme “données” :
 
 ``` r
-# Classer les corps dans l'ordre hiérarchique
-ordre_corps <- c("ATRF", "TECH", "AI", "IE", "IR")
-
 data_filtered %>%
     mutate(referens_id = fct_reorder(referens_id, -somme),
          referens_cs=factor(referens_cs, levels = ordre_corps)) %>%
-  ggplot(aes(x = referens_id, y = somme, color=referens_cs)) +
+  ggplot(aes(x = referens_id, y = somme, color=referens_cs, label=somme)) +
   geom_point() +
+    geom_text_repel(box.padding=0.5,max.overlaps = Inf, aes(label=ifelse(somme>=17,somme,'')), show.legend=FALSE) +
   labs(x="Rang", y="Nombre d'occurrences du terme ''données''", color="Corps",
        title="Distribution des fiches métiers",
-       caption="Données MESRI – Visualisation CC-BY Antoine Blanchard / Datactivist") +
+       caption="Données MESRI – Analyse CC-BY Antoine Blanchard / Datactivist") +
   theme_ipsum() +
   theme(axis.title.x=element_blank(),
         axis.text.x=element_blank(),
@@ -123,11 +123,64 @@ data_filtered %>%
 
 ![](Notebook_files/figure-gfm/distribution_corps-1.png)<!-- -->
 
-On observe une distribution fortement asymétrique.
+On observe une distribution fortement asymétrique, avec un décrochement
+à y=17.
+
+On étiquette les 8 métiers où le terme apparaît 17 fois ou plus :
+
+``` r
+data_filtered %>%
+    mutate(referens_id = fct_reorder(referens_id, -somme),
+         referens_cs=factor(referens_cs, levels = ordre_corps)) %>%
+  ggplot(aes(x = referens_id, y = somme, color=referens_cs, label=referens_intitule)) +
+  geom_point() +
+    geom_text_repel(size=2.5,box.padding=0.5,max.overlaps = Inf,force=8, aes(label=ifelse(somme>=17,referens_intitule,'')), show.legend=FALSE,
+    nudge_x           = 0.2,
+    direction         = "both",
+    segment.size      = 0.2,
+    segment.curvature = -0.1,
+    segment.inflect=FALSE) +
+  labs(x="Rang", y="Nombre d'occurrences du terme ''données''", color="Corps",
+       title="Distribution des fiches métiers",
+       caption="Données MESRI – Analyse CC-BY Antoine Blanchard / Datactivist") +
+  theme_ipsum() +
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
+```
+
+![](Notebook_files/figure-gfm/distribution_corps_avec_intitule-1.png)<!-- -->
+
+Et sous forme de table :
+
+``` r
+top_metiers <- data_filtered %>%
+  filter(somme >= 17) %>%
+  arrange(desc(somme)) %>%
+  select (referens_intitule, bap, referens_fap, referens_cs, somme, Id)
+
+kable(top_metiers, caption = "Métiers incluant au moins 17 fois le terme 'données'")
+```
+
+| referens\_intitule                                                             | bap                                                           | referens\_fap                                        | referens\_cs | somme | Id  |
+|:-------------------------------------------------------------------------------|:--------------------------------------------------------------|:-----------------------------------------------------|:-------------|------:|:----|
+| Ingénieur-e de recherche en production, traitement et analyse de données       | BAP D - Sciences Humaines et Sociales                         | Production, traitement et analyse des données        | IR           |    35 | 123 |
+| Ingénieur-e d’études en production, traitement, analyse de données et enquêtes | BAP D - Sciences Humaines et Sociales                         | Production, traitement et analyse des données        | IE           |    29 | 160 |
+| Technicien-ne en production, traitement de données et enquêtes                 | BAP D - Sciences Humaines et Sociales                         | Production, traitement et analyse des données        | TECH         |    25 | 101 |
+| Assistant-e ingénieur-e en production, traitement de données et enquêtes       | BAP D - Sciences Humaines et Sociales                         | Production, traitement et analyse des données        | AI           |    24 | 106 |
+| Assistant-e ingénieur-e biologiste en traitement de données                    | BAP A - Sciences du vivant, de la terre et de l’environnement | Biologie et santé, Sciences de la vie et de la terre | AI           |    23 | 125 |
+| Assistant-e statisticien-ne                                                    | BAP E - Informatique, Statistiques et Calcul scientifique     | Statistiques                                         | AI           |    21 | 161 |
+| Administrateur-trice de bases de données / Intégrateur d’applications          | BAP E - Informatique, Statistiques et Calcul scientifique     | Ingénierie technique et de production                | IE           |    20 | 116 |
+| Ingénieur-e statisticien-ne                                                    | BAP E - Informatique, Statistiques et Calcul scientifique     | Statistiques                                         | IE           |    17 | 215 |
+
+Métiers incluant au moins 17 fois le terme ‘données’
+
+On constate que ce sont majoritairement des métiers AI et IE,
+majoritairement en soutien à la recherche (BAP A et D).
 
 ## Occurrences de l’expression “données” par champ
 
-Dans quelles colonnes du jeu de données (variable) trouve-t-on le plus
+Dans quelles colonnes (variables) du jeu de données trouve-t-on le plus
 le terme “données” ?
 
 ``` r
@@ -141,7 +194,7 @@ denombrement %>%
   ggplot(aes(x=fct_reorder(variable, somme), y = somme)) +
   geom_col(aes(fill = variable), color = "grey50") +
   labs(x = "", y = "Nombre d'occurrences du terme ''données''",
-       caption="Données MESRI – Visualisation CC-BY Antoine Blanchard / Datactivist")+
+       caption="Données MESRI – Analyse CC-BY Antoine Blanchard / Datactivist")+
   coord_flip()+
   theme_ipsum() +
   theme(legend.position = "none")
@@ -171,28 +224,57 @@ intitule_filtered <- data_filtered %>%
   mutate(Id = as.character(Id),
          referens_cs=factor(referens_cs, levels = ordre_corps)) %>%
   left_join(data_filtered %>% select(Id, somme), by = "Id") %>%
-  select(referens_intitule, referens_metiers, bap, referens_fap, referens_cs) %>%
-  group_by(bap) %>%
-  arrange(referens_cs, .by_group = TRUE)
+  select(referens_intitule, referens_metiers, bap, referens_fap, referens_cs, Id) %>%
+  arrange(bap,referens_cs)
 
 kable(intitule_filtered, caption = "Métiers incluant le terme 'données' dans leur intitulé")
 ```
 
-| referens\_intitule                                                             | referens\_metiers                        | bap                                                                   | referens\_fap                                                                     | referens\_cs |
-|:-------------------------------------------------------------------------------|:-----------------------------------------|:----------------------------------------------------------------------|:----------------------------------------------------------------------------------|:-------------|
-| Assistant-e ingénieur-e biologiste en traitement de données                    |                                          | BAP A - Sciences du vivant, de la terre et de l’environnement         | Biologie et santé, Sciences de la vie et de la terre                              | AI           |
-| Ingénieur-e biologiste en traitement de données                                | epidémiologiste\|bio informaticien       | BAP A - Sciences du vivant, de la terre et de l’environnement         | Biologie et santé, Sciences de la vie et de la terre                              | IE           |
-| Ingénieur-e biologiste en analyse de données                                   | epidémiologiste\|bio informaticien       | BAP A - Sciences du vivant, de la terre et de l’environnement         | Biologie et santé, Sciences de la vie et de la terre                              | IR           |
-| Technicien-ne en production, traitement de données et enquêtes                 |                                          | BAP D - Sciences Humaines et Sociales                                 | Production, traitement et analyse des données                                     | TECH         |
-| Assistant-e ingénieur-e en production, traitement de données et enquêtes       |                                          | BAP D - Sciences Humaines et Sociales                                 | Production, traitement et analyse des données                                     | AI           |
-| Ingénieur-e d’études en production, traitement, analyse de données et enquêtes |                                          | BAP D - Sciences Humaines et Sociales                                 | Production, traitement et analyse des données                                     | IE           |
-| Ingénieur-e de recherche en production, traitement et analyse de données       |                                          | BAP D - Sciences Humaines et Sociales                                 | Production, traitement et analyse des données                                     | IR           |
-| Administrateur-trice de bases de données / Intégrateur d’applications          | administrateur de bases de données (dba) | BAP E - Informatique, Statistiques et Calcul scientifique             | Ingénierie technique et de production                                             | IE           |
-| Chargé-e de l’édition de corpus numériques                                     | éditeur de données scientifiques         | BAP F - Culture, Communication, Production et diffusion des savoirs   | Édition et graphisme                                                              | IE           |
-| Chargé-e du traitement des données scientifiques                               |                                          | BAP F - Culture, Communication, Production et diffusion des savoirs   | Information scientifique et technique, documentation et collections patrimoniales | IE           |
-| Gestionnaire de données et indicateurs patrimoniaux                            |                                          | BAP G - Patrimoine immobilier, Logistique, Restauration et Prévention | Patrimoine immobilier                                                             | AI           |
+| referens\_intitule                                                             | referens\_metiers                        | bap                                                                   | referens\_fap                                                                     | referens\_cs | Id  |
+|:-------------------------------------------------------------------------------|:-----------------------------------------|:----------------------------------------------------------------------|:----------------------------------------------------------------------------------|:-------------|:----|
+| Assistant-e ingénieur-e biologiste en traitement de données                    |                                          | BAP A - Sciences du vivant, de la terre et de l’environnement         | Biologie et santé, Sciences de la vie et de la terre                              | AI           | 125 |
+| Ingénieur-e biologiste en traitement de données                                | epidémiologiste\|bio informaticien       | BAP A - Sciences du vivant, de la terre et de l’environnement         | Biologie et santé, Sciences de la vie et de la terre                              | IE           | 230 |
+| Ingénieur-e biologiste en analyse de données                                   | epidémiologiste\|bio informaticien       | BAP A - Sciences du vivant, de la terre et de l’environnement         | Biologie et santé, Sciences de la vie et de la terre                              | IR           | 178 |
+| Technicien-ne en production, traitement de données et enquêtes                 |                                          | BAP D - Sciences Humaines et Sociales                                 | Production, traitement et analyse des données                                     | TECH         | 101 |
+| Assistant-e ingénieur-e en production, traitement de données et enquêtes       |                                          | BAP D - Sciences Humaines et Sociales                                 | Production, traitement et analyse des données                                     | AI           | 106 |
+| Ingénieur-e d’études en production, traitement, analyse de données et enquêtes |                                          | BAP D - Sciences Humaines et Sociales                                 | Production, traitement et analyse des données                                     | IE           | 160 |
+| Ingénieur-e de recherche en production, traitement et analyse de données       |                                          | BAP D - Sciences Humaines et Sociales                                 | Production, traitement et analyse des données                                     | IR           | 123 |
+| Administrateur-trice de bases de données / Intégrateur d’applications          | administrateur de bases de données (dba) | BAP E - Informatique, Statistiques et Calcul scientifique             | Ingénierie technique et de production                                             | IE           | 116 |
+| Chargé-e de l’édition de corpus numériques                                     | éditeur de données scientifiques         | BAP F - Culture, Communication, Production et diffusion des savoirs   | Édition et graphisme                                                              | IE           | 91  |
+| Chargé-e du traitement des données scientifiques                               |                                          | BAP F - Culture, Communication, Production et diffusion des savoirs   | Information scientifique et technique, documentation et collections patrimoniales | IE           | 146 |
+| Gestionnaire de données et indicateurs patrimoniaux                            |                                          | BAP G - Patrimoine immobilier, Logistique, Restauration et Prévention | Patrimoine immobilier                                                             | AI           | 80  |
 
 Métiers incluant le terme ‘données’ dans leur intitulé
+
+Ensemble, ces deux listes de métiers obtenues par deux méthodes
+différentes (que le terme apparaisse au moins 17 fois ou qu’il
+apparaisse dans l’intitulé) forment une liste de 13 métiers-types que
+l’on peut qualifier de “métiers des données”.
+
+``` r
+metiers_donnee <- full_join(intitule_filtered,top_metiers,by=c("referens_intitule","bap","referens_fap","referens_cs","Id"))  %>%
+  arrange(bap,referens_cs)
+
+kable(metiers_donnee, caption = "Métiers des données")
+```
+
+| referens\_intitule                                                             | referens\_metiers                        | bap                                                                   | referens\_fap                                                                     | referens\_cs | Id  | somme |
+|:-------------------------------------------------------------------------------|:-----------------------------------------|:----------------------------------------------------------------------|:----------------------------------------------------------------------------------|:-------------|:----|------:|
+| Assistant-e ingénieur-e biologiste en traitement de données                    |                                          | BAP A - Sciences du vivant, de la terre et de l’environnement         | Biologie et santé, Sciences de la vie et de la terre                              | AI           | 125 |    23 |
+| Ingénieur-e biologiste en traitement de données                                | epidémiologiste\|bio informaticien       | BAP A - Sciences du vivant, de la terre et de l’environnement         | Biologie et santé, Sciences de la vie et de la terre                              | IE           | 230 |    NA |
+| Ingénieur-e biologiste en analyse de données                                   | epidémiologiste\|bio informaticien       | BAP A - Sciences du vivant, de la terre et de l’environnement         | Biologie et santé, Sciences de la vie et de la terre                              | IR           | 178 |    NA |
+| Technicien-ne en production, traitement de données et enquêtes                 |                                          | BAP D - Sciences Humaines et Sociales                                 | Production, traitement et analyse des données                                     | TECH         | 101 |    25 |
+| Assistant-e ingénieur-e en production, traitement de données et enquêtes       |                                          | BAP D - Sciences Humaines et Sociales                                 | Production, traitement et analyse des données                                     | AI           | 106 |    24 |
+| Ingénieur-e d’études en production, traitement, analyse de données et enquêtes |                                          | BAP D - Sciences Humaines et Sociales                                 | Production, traitement et analyse des données                                     | IE           | 160 |    29 |
+| Ingénieur-e de recherche en production, traitement et analyse de données       |                                          | BAP D - Sciences Humaines et Sociales                                 | Production, traitement et analyse des données                                     | IR           | 123 |    35 |
+| Assistant-e statisticien-ne                                                    | NA                                       | BAP E - Informatique, Statistiques et Calcul scientifique             | Statistiques                                                                      | AI           | 161 |    21 |
+| Administrateur-trice de bases de données / Intégrateur d’applications          | administrateur de bases de données (dba) | BAP E - Informatique, Statistiques et Calcul scientifique             | Ingénierie technique et de production                                             | IE           | 116 |    20 |
+| Ingénieur-e statisticien-ne                                                    | NA                                       | BAP E - Informatique, Statistiques et Calcul scientifique             | Statistiques                                                                      | IE           | 215 |    17 |
+| Chargé-e de l’édition de corpus numériques                                     | éditeur de données scientifiques         | BAP F - Culture, Communication, Production et diffusion des savoirs   | Édition et graphisme                                                              | IE           | 91  |    NA |
+| Chargé-e du traitement des données scientifiques                               |                                          | BAP F - Culture, Communication, Production et diffusion des savoirs   | Information scientifique et technique, documentation et collections patrimoniales | IE           | 146 |    NA |
+| Gestionnaire de données et indicateurs patrimoniaux                            |                                          | BAP G - Patrimoine immobilier, Logistique, Restauration et Prévention | Patrimoine immobilier                                                             | AI           | 80  |    NA |
+
+Métiers des données
 
 ## Occurrences de l’expression “données” par BAP
 
@@ -217,7 +299,7 @@ BAP_filtered_pourcentage %>%
   geom_col(aes(fill = bap), color = "grey50") +
   labs(x = "", y = "Proportion",
        title="Proportion de fiches métiers liées aux ''données'' par BAP",
-    caption="Données MESRI – Visualisation CC-BY Antoine Blanchard / Datactivist") +
+    caption="Données MESRI – Analyse CC-BY Antoine Blanchard / Datactivist") +
   theme_ipsum() +
   coord_flip() +
   theme_ipsum(grid="X") +
@@ -257,8 +339,8 @@ corps_filtered_pourcentage %>%
   ggplot(aes(x = referens_cs, y = pourcentage_corps)) +
   geom_col(aes(fill = referens_cs), color = "grey50") +
   labs(x = "Corps", y = "Proportion",
-       title="Proportion de fiches métiers liées aux ''données'' par corps",
-      caption="Données MESRI – Visualisation CC-BY Antoine Blanchard / Datactivist") +
+       title="Proportion de fiches métiers liées aux ''données''\n par corps",
+      caption="Données MESRI – Analyse CC-BY Antoine Blanchard / Datactivist") +
   coord_flip() +
   theme_ipsum(grid="X") +
   theme(legend.position = "none") +
@@ -279,8 +361,8 @@ data_filtered %>%
   ggplot(aes(x = referens_bap_id, fill=referens_cs)) +
     geom_bar() +
       labs(x= "BAP", y = "Nombre de fiches métiers", fill="Corps",
-           title="Nombre de fiches métiers liées aux données par corps et BAP",
-         caption="Données MESRI – Visualisation CC-BY Antoine Blanchard / Datactivist") +
+           title="Nombre de fiches métiers liées aux données\n par corps et BAP",
+         caption="Données MESRI – Analyse CC-BY Antoine Blanchard / Datactivist") +
 theme_ipsum(grid="Y")
 ```
 
@@ -322,41 +404,12 @@ temp <- data_filtered %>%
 
 Métiers IE de la BAP F liés aux données
 
-## Métiers qui concentrent le plus le terme “données”
-
-On classe les métiers qui concentrent le plus le terme “données” et on
-affiche ceux où le terme apparaît 15 fois ou plus :
-
-``` r
-top_metiers <- data_filtered %>%
-  filter(somme >= 15) %>%
-  arrange(desc(somme)) %>%
-  select (referens_intitule, bap, referens_fap, referens_cs, somme)
-
-kable(top_metiers, caption = "Métiers incluant au moins 15 fois le terme 'données'")
-```
-
-| referens\_intitule                                                             | bap                                                           | referens\_fap                                        | referens\_cs | somme |
-|:-------------------------------------------------------------------------------|:--------------------------------------------------------------|:-----------------------------------------------------|:-------------|------:|
-| Ingénieur-e de recherche en production, traitement et analyse de données       | BAP D - Sciences Humaines et Sociales                         | Production, traitement et analyse des données        | IR           |    35 |
-| Ingénieur-e d’études en production, traitement, analyse de données et enquêtes | BAP D - Sciences Humaines et Sociales                         | Production, traitement et analyse des données        | IE           |    29 |
-| Technicien-ne en production, traitement de données et enquêtes                 | BAP D - Sciences Humaines et Sociales                         | Production, traitement et analyse des données        | TECH         |    25 |
-| Assistant-e ingénieur-e en production, traitement de données et enquêtes       | BAP D - Sciences Humaines et Sociales                         | Production, traitement et analyse des données        | AI           |    24 |
-| Assistant-e ingénieur-e biologiste en traitement de données                    | BAP A - Sciences du vivant, de la terre et de l’environnement | Biologie et santé, Sciences de la vie et de la terre | AI           |    23 |
-| Assistant-e statisticien-ne                                                    | BAP E - Informatique, Statistiques et Calcul scientifique     | Statistiques                                         | AI           |    21 |
-| Administrateur-trice de bases de données / Intégrateur d’applications          | BAP E - Informatique, Statistiques et Calcul scientifique     | Ingénierie technique et de production                | IE           |    20 |
-| Ingénieur-e statisticien-ne                                                    | BAP E - Informatique, Statistiques et Calcul scientifique     | Statistiques                                         | IE           |    17 |
-| Ingénieur-e d’études en sciences de l’information géographique                 | BAP D - Sciences Humaines et Sociales                         | Sciences de l’information géographique               | IE           |    15 |
-
-Métiers incluant au moins 15 fois le terme ‘données’
-
-On constate que ce sont beaucoup de métiers AI, beaucoup en soutien à la
-recherche. Question : on a vu que les corps IE et IR possèdent
-proportionnellement plus de métiers liés **aux** données, mais dans
-quels corps trouve-t-on les métiers **des** données (c’est-à-dire où le
-terme apparaît le plus fréquemment) ?
-
 ## Dispersion des fiches métiers par corps
+
+Question : on a vu que les corps IE et IR possèdent proportionnellement
+plus de métiers liés **aux** données, mais dans quels corps trouve-t-on
+les métiers **des** données (c’est-à-dire où le terme apparaît le plus
+fréquemment) ?
 
 On trace la dispersion des fiches métiers par corps selon les
 occurrences du mot “données”, avec une représentation par boxplot :
@@ -368,8 +421,8 @@ data_filtered %>%
     geom_boxplot()+
   geom_jitter(shape=16, position=position_jitter (0.2)) +
     labs(x= "Corps", y = "Nombre d'occurrences du terme ''données''", color="Corps",
-         title="Dispersion des fiches métiers liées aux données par corps",
-         caption="Données MESRI – Visualisation CC-BY Antoine Blanchard / Datactivist") +
+         title="Dispersion des fiches métiers liées aux données\n par corps",
+         caption="Données MESRI – Analyse CC-BY Antoine Blanchard / Datactivist") +
   theme_ipsum() +
     theme(legend.position = "none")
 ```
@@ -430,15 +483,15 @@ suppression_metiers <- denombrement %>%
   select(Id) %>%
   left_join(data_filtered, by = "Id") %>%
   select (referens_intitule, referens_intitule_precedent, bap, referens_fap, referens_cs) %>%
-  arrange(referens_cs) # Bug car ne s'ordonne pas par corps
+  arrange(referens_cs) 
 
 kable(suppression_metiers, caption = "Métiers dont l'ancien intitulé incluait le terme 'données' contrairement à l'intitulé actuel")
 ```
 
 | referens\_intitule                                                           | referens\_intitule\_precedent                                          | bap                                                       | referens\_fap                                                                | referens\_cs |
 |:-----------------------------------------------------------------------------|:-----------------------------------------------------------------------|:----------------------------------------------------------|:-----------------------------------------------------------------------------|:-------------|
-| Gestionnaire d’application / assistance support                              | Gestionnaire de base de données                                        | BAP E - Informatique, Statistiques et Calcul scientifique | Ingénierie des systèmes d’information                                        | AI           |
 | Technicien-ne d’exploitation, d’assistance et de traitement de l’information | Technicien d’exploitation, de maintenance et de traitement des données | BAP E - Informatique, Statistiques et Calcul scientifique | Ingénierie des systèmes d’information\|Ingénierie technique et de production | TECH         |
+| Gestionnaire d’application / assistance support                              | Gestionnaire de base de données                                        | BAP E - Informatique, Statistiques et Calcul scientifique | Ingénierie des systèmes d’information                                        | AI           |
 
 Métiers dont l’ancien intitulé incluait le terme ‘données’ contrairement
 à l’intitulé actuel
