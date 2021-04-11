@@ -3,10 +3,10 @@ title: "Analyse des données RéFérens III"
 author: "Antoine Blanchard"
 date: "08/04/2021"
 output:
-  github_document:
-   toc: true
   html_document: default
   pdf_document: default
+  github_document:
+   toc: true
 ---
 
 ```{r setup, include=FALSE}
@@ -95,9 +95,9 @@ data_filtered %>%
         axis.ticks.x=element_blank())
 ```
 
-On observe une distribution fortement asymétrique, avec un décrochement à y=17.
+On observe une distribution fortement asymétrique, avec un décrochement à y=17. Nous sommes donc tentés de placer un seuil entre les fiches métiers qui forment une continuité de y=15 à y=1 et les 8 métiers où le terme apparaît 17 fois ou plus.
 
-On étiquette les 8 métiers où le terme apparaît 17 fois ou plus :
+On étiquette ces 8 métiers :
 
 ```{r distribution_corps_avec_intitule, results ='asis'}
 data_filtered %>%

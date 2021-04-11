@@ -124,9 +124,11 @@ data_filtered %>%
 ![](Notebook_files/figure-gfm/distribution_corps-1.png)<!-- -->
 
 On observe une distribution fortement asymétrique, avec un décrochement
-à y=17.
+à y=17. Nous sommes donc tentés de placer un seuil entre les fiches
+métiers qui forment une continuité de y=15 à y=1 et les 8 métiers où le
+terme apparaît 17 fois ou plus.
 
-On étiquette les 8 métiers où le terme apparaît 17 fois ou plus :
+On étiquette ces 8 métiers :
 
 ``` r
 data_filtered %>%
