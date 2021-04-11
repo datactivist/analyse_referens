@@ -8,7 +8,7 @@ library(forcats)
 library(tm)
 library(RColorBrewer)
 
-# Importation des données issues de https://framagit.org/FalaF/data-itrf
+# Importation des données issues de https://framagit.org/FalaF/data-itrf (version du 8 avril 2021)
 
 postes <- read.csv2("liste-postes.csv", na.strings=c('_','nc')) %>%
   mutate(Id = row_number()) %>%
