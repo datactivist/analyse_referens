@@ -1,7 +1,7 @@
 Analyse des données RéFérens III
 ================
 Antoine Blanchard
-08/04/2021
+21/04/2021
 
 -   [Import du référentiel métier
     RéFérens](#import-du-référentiel-métier-référens)
@@ -118,7 +118,8 @@ data_filtered %>%
   theme_ipsum() +
   theme(axis.title.x=element_blank(),
         axis.text.x=element_blank(),
-        axis.ticks.x=element_blank())
+        axis.ticks.x=element_blank(),
+        panel.grid.major.x = element_blank())
 ```
 
 ![](Notebook_files/figure-gfm/distribution_corps-1.png)<!-- -->
@@ -148,7 +149,8 @@ data_filtered %>%
   theme_ipsum() +
   theme(axis.title.x=element_blank(),
         axis.text.x=element_blank(),
-        axis.ticks.x=element_blank())
+        axis.ticks.x=element_blank(),
+        panel.grid.major.x = element_blank())
 ```
 
 ![](Notebook_files/figure-gfm/distribution_corps_avec_intitule-1.png)<!-- -->
@@ -196,6 +198,7 @@ denombrement %>%
   ggplot(aes(x=fct_reorder(variable, somme), y = somme)) +
   geom_col(aes(fill = variable), color = "grey50") +
   labs(x = "", y = "Nombre d'occurrences du terme ''données''",
+       title="Classement des variables selon \n le nombre d'occurrences du terme ''données''",
        caption="Données MESRI – Analyse CC-BY Antoine Blanchard / Datactivist")+
   coord_flip()+
   theme_ipsum() +
@@ -215,6 +218,36 @@ moyen terme” du métier qui vise, selon la documentation de RéFérens, à
 identifier les facteurs clés et en déduire leur impact qualitatif sur le
 métier.
 
+On regarde quelle place le terme “données” occupe comparativement aux
+autres termes les plus utilisés dans le champ “Facteurs d’évolution à
+moyen terme” :
+
+``` r
+data_filtered %>%
+  unnest_tokens(word, referens_facteurs_d_evolution_moyen_terme) %>%
+      mutate(stem = wordStem(word)) %>%
+  anti_join(get_stopwords(language = "fr")) %>%
+  count(stem, sort = TRUE) %>%
+  filter(n >25) 
+```
+
+    ## Joining, by = "word"
+
+    ##       stem   n
+    ## 1 développ 108
+    ## 2  gestion  45
+    ## 3    donné  43
+    ## 4   evolut  36
+    ## 5 techniqu  34
+    ## 6 numériqu  30
+    ## 7   nouvel  26
+    ## 8 recherch  26
+
+Le terme “données” est même le terme qui revient le plus fréquemment (43
+occurrences) dans le champ “Facteurs d’évolution à moyen terme” des
+fiches métiers après “développement” et apparentés (108) et “gestion”
+(45).
+
 ## Liste des 11 métiers dont l’intitulé contient l’expression “données”
 
 ``` r
@@ -229,7 +262,7 @@ intitule_filtered <- data_filtered %>%
   select(referens_intitule, referens_metiers, bap, referens_fap, referens_cs, Id) %>%
   arrange(bap,referens_cs)
 
-kable(intitule_filtered, caption = "Métiers incluant le terme 'données' dans leur intitulé")
+kable(intitule_filtered, caption = "Métiers incluant le terme \"données\" dans leur intitulé")
 ```
 
 | referens\_intitule                                                             | referens\_metiers                        | bap                                                                   | referens\_fap                                                                     | referens\_cs | Id  |
@@ -246,7 +279,7 @@ kable(intitule_filtered, caption = "Métiers incluant le terme 'données' dans l
 | Chargé-e du traitement des données scientifiques                               |                                          | BAP F - Culture, Communication, Production et diffusion des savoirs   | Information scientifique et technique, documentation et collections patrimoniales | IE           | 146 |
 | Gestionnaire de données et indicateurs patrimoniaux                            |                                          | BAP G - Patrimoine immobilier, Logistique, Restauration et Prévention | Patrimoine immobilier                                                             | AI           | 80  |
 
-Métiers incluant le terme ‘données’ dans leur intitulé
+Métiers incluant le terme “données” dans leur intitulé
 
 Ensemble, ces deux listes de métiers obtenues par deux méthodes
 différentes (que le terme apparaisse au moins 17 fois ou qu’il
@@ -300,7 +333,7 @@ BAP_filtered_pourcentage %>%
   ggplot(aes(x = bap, y = pourcentage_bap)) +
   geom_col(aes(fill = bap), color = "grey50") +
   labs(x = "", y = "Proportion",
-       title="Proportion de fiches métiers liées aux ''données'' par BAP",
+       title="Proportion de fiches métiers comprenant \nle terme \"données\" par BAP",
     caption="Données MESRI – Analyse CC-BY Antoine Blanchard / Datactivist") +
   theme_ipsum() +
   coord_flip() +
@@ -341,7 +374,7 @@ corps_filtered_pourcentage %>%
   ggplot(aes(x = referens_cs, y = pourcentage_corps)) +
   geom_col(aes(fill = referens_cs), color = "grey50") +
   labs(x = "Corps", y = "Proportion",
-       title="Proportion de fiches métiers liées aux ''données''\n par corps",
+       title="Proportion de fiches métiers comprenant \nle terme \"données\" par corps",
       caption="Données MESRI – Analyse CC-BY Antoine Blanchard / Datactivist") +
   coord_flip() +
   theme_ipsum(grid="X") +
@@ -363,7 +396,7 @@ data_filtered %>%
   ggplot(aes(x = referens_bap_id, fill=referens_cs)) +
     geom_bar() +
       labs(x= "BAP", y = "Nombre de fiches métiers", fill="Corps",
-           title="Nombre de fiches métiers liées aux données\n par corps et BAP",
+           title="Nombre de fiches métiers comprenant \nle terme \"données\" par corps et BAP",
          caption="Données MESRI – Analyse CC-BY Antoine Blanchard / Datactivist") +
 theme_ipsum(grid="Y")
 ```
@@ -423,7 +456,7 @@ data_filtered %>%
     geom_boxplot()+
   geom_jitter(shape=16, position=position_jitter (0.2)) +
     labs(x= "Corps", y = "Nombre d'occurrences du terme ''données''", color="Corps",
-         title="Dispersion des fiches métiers liées aux données\n par corps",
+         title="Dispersion des fiches métiers comprenant \nle terme \"données\" par corps",
          caption="Données MESRI – Analyse CC-BY Antoine Blanchard / Datactivist") +
   theme_ipsum() +
     theme(legend.position = "none")
