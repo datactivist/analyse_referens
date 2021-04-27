@@ -3,9 +3,9 @@ title: "Analyse des données RéFérens III"
 author: "Antoine Blanchard"
 date: "28/04/2021"
 output:
-  html_document: default
   github_document:
    toc: true
+  html_document: default
   pdf_document: default
 ---
 
@@ -109,8 +109,10 @@ On étiquette ces 8 métiers (les autres étiquettes s'affichent au survol) :
 ```{r distribution_corps_avec_intitule, results ='asis'}
 distribution_corps_avec_intitule <- data_filtered %>%
     mutate(referens_id = fct_reorder(referens_id, -somme),
-         referens_cs=factor(referens_cs, levels = ordre_corps)) %>%
-  ggplot(aes(x = referens_id, y = somme, color=referens_cs, label=referens_intitule)) +
+         referens_cs=factor(referens_cs, levels = ordre_corps))
+
+  ggplot(distribution_corps_avec_intitule) +
+    aes(x = referens_id, y = somme, color=referens_cs, label=referens_intitule) +
   geom_point() +
     geom_text_repel(size=2.5,box.padding=0.5,max.overlaps = Inf,force=8, aes(label=ifelse(somme>=17,referens_intitule,'')), show.legend=FALSE,
     nudge_x           = 0.2,
@@ -127,11 +129,6 @@ distribution_corps_avec_intitule <- data_filtered %>%
         axis.text.x=element_blank(),
         axis.ticks.x=element_blank(),
         panel.grid.major.x = element_blank())
-```
-
-```{r distribution_interactive, results ='asis'}
-distribution_interactive <- distribution_corps_avec_intitule + geom_point_interactive(aes(tooltip = referens_intitule), size = 2)
-girafe(code = print(distribution_interactive))
 ```
 
 Et sous forme de table :
@@ -311,8 +308,10 @@ On trace la dispersion des fiches métiers par corps selon les occurrences du mo
 
 ```{r boxplot_corps, results ='asis'}
 dispersion_corps <- data_filtered %>%
-      mutate(referens_cs=factor(referens_cs, levels = ordre_corps)) %>%
-  ggplot(aes(x = referens_cs, y = somme, color=referens_cs)) +
+      mutate(referens_cs=factor(referens_cs, levels = ordre_corps))
+
+  ggplot(dispersion_corps) +
+  aes(x = referens_cs, y = somme, color=referens_cs) +
     geom_boxplot()+
   geom_jitter(shape=16, position=position_jitter (0.2)) +
     labs(x= "Corps", y = "Nombre d'occurrences du terme ''données''", color="Corps",
@@ -320,11 +319,6 @@ dispersion_corps <- data_filtered %>%
          caption="Données MESRI – Analyse CC-BY Antoine Blanchard / Datactivist") +
   theme_ipsum() +
     theme(legend.position = "none")
-```
-
-```{r dispersion_interactive, results ='asis'}
-dispersion_interactive <- dispersion_corps + geom_point_interactive(aes(tooltip = referens_intitule), size = 2)
-girafe(code = print(dispersion_interactive))
 ```
 
 Il apparaît que les corps IE et IR ont la distribution la plus étirée vers le haut, ce sont ceux où l'on trouve le plus de métiers **des** données.

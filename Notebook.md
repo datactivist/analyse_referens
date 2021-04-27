@@ -1,7 +1,7 @@
 Analyse des données RéFérens III
 ================
 Antoine Blanchard
-21/04/2021
+28/04/2021
 
 -   [Import du référentiel métier
     RéFérens](#import-du-référentiel-métier-référens)
@@ -130,10 +130,11 @@ On observe une distribution fortement asymétrique, avec un décrochement
 métiers qui forment une continuité de y=15 à y=1 et les 8 métiers où le
 terme apparaît 17 fois ou plus.
 
-On étiquette ces 8 métiers :
+On étiquette ces 8 métiers (les autres étiquettes s’affichent au survol)
+:
 
 ``` r
-data_filtered %>%
+distribution_corps_avec_intitule <- data_filtered %>%
     mutate(referens_id = fct_reorder(referens_id, -somme),
          referens_cs=factor(referens_cs, levels = ordre_corps)) %>%
   ggplot(aes(x = referens_id, y = somme, color=referens_cs, label=referens_intitule)) +
@@ -154,8 +155,6 @@ data_filtered %>%
         axis.ticks.x=element_blank(),
         panel.grid.major.x = element_blank())
 ```
-
-![](Notebook_files/figure-gfm/distribution_corps_avec_intitule-1.png)<!-- -->
 
 Et sous forme de table :
 
@@ -452,7 +451,7 @@ On trace la dispersion des fiches métiers par corps selon les
 occurrences du mot “données”, avec une représentation par boxplot :
 
 ``` r
-data_filtered %>%
+dispersion_corps <- data_filtered %>%
       mutate(referens_cs=factor(referens_cs, levels = ordre_corps)) %>%
   ggplot(aes(x = referens_cs, y = somme, color=referens_cs)) +
     geom_boxplot()+
@@ -463,8 +462,6 @@ data_filtered %>%
   theme_ipsum() +
     theme(legend.position = "none")
 ```
-
-![](Notebook_files/figure-gfm/boxplot_corps-1.png)<!-- -->
 
 Il apparaît que les corps IE et IR ont la distribution la plus étirée
 vers le haut, ce sont ceux où l’on trouve le plus de métiers **des**
