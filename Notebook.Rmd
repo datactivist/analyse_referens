@@ -1,12 +1,12 @@
 ---
 title: "Analyse des données RéFérens III"
 author: "Antoine Blanchard"
-date: "21/04/2021"
+date: "28/04/2021"
 output:
-  pdf_document: default
   html_document: default
   github_document:
    toc: true
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -310,7 +310,7 @@ Question : on a vu que les corps IE et IR possèdent proportionnellement plus de
 On trace la dispersion des fiches métiers par corps selon les occurrences du mot "données", avec une représentation par boxplot :
 
 ```{r boxplot_corps, results ='asis'}
-data_filtered %>%
+dispersion_corps <- data_filtered %>%
       mutate(referens_cs=factor(referens_cs, levels = ordre_corps)) %>%
   ggplot(aes(x = referens_cs, y = somme, color=referens_cs)) +
     geom_boxplot()+
@@ -320,6 +320,11 @@ data_filtered %>%
          caption="Données MESRI – Analyse CC-BY Antoine Blanchard / Datactivist") +
   theme_ipsum() +
     theme(legend.position = "none")
+```
+
+```{r dispersion_interactive, results ='asis'}
+dispersion_interactive <- dispersion_corps + geom_point_interactive(aes(tooltip = referens_intitule), size = 2)
+girafe(code = print(dispersion_interactive))
 ```
 
 Il apparaît que les corps IE et IR ont la distribution la plus étirée vers le haut, ce sont ceux où l'on trouve le plus de métiers **des** données.
