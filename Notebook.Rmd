@@ -26,6 +26,8 @@ library(cluster, quietly=TRUE)
 library(tidytext, quietly=TRUE)
 library(stopwords, quietly=TRUE)
 library(SnowballC, quietly=TRUE)
+library(ggiraph, quietly=TRUE)
+
 ```
 
 ## Import du référentiel métier RéFérens
@@ -92,6 +94,7 @@ data_filtered %>%
   labs(x="Rang", y="Nombre d'occurrences du terme ''données''", color="Corps",
        title="Distribution des fiches métiers",
        caption="Données MESRI – Analyse CC-BY Antoine Blanchard / Datactivist") +
+    scale_color_hue(labels = c("ATRF (Cat. C)", "TECH (Cat. B)", "AI (Cat. A)", "IE (Cat. A)", "IR (Cat. A)")) +
   theme_ipsum() +
   theme(axis.title.x=element_blank(),
         axis.text.x=element_blank(),
@@ -101,10 +104,10 @@ data_filtered %>%
 
 On observe une distribution fortement asymétrique, avec un décrochement à y=17. Nous sommes donc tentés de placer un seuil entre les fiches métiers qui forment une continuité de y=15 à y=1 et les 8 métiers où le terme apparaît 17 fois ou plus.
 
-On étiquette ces 8 métiers :
+On étiquette ces 8 métiers (les autres étiquettes s'affichent au survol) :
 
 ```{r distribution_corps_avec_intitule, results ='asis'}
-data_filtered %>%
+distribution_corps_avec_intitule <- data_filtered %>%
     mutate(referens_id = fct_reorder(referens_id, -somme),
          referens_cs=factor(referens_cs, levels = ordre_corps)) %>%
   ggplot(aes(x = referens_id, y = somme, color=referens_cs, label=referens_intitule)) +
@@ -115,14 +118,20 @@ data_filtered %>%
     segment.size      = 0.2,
     segment.curvature = -0.1,
     segment.inflect=FALSE) +
-  labs(x="Rang", y="Nombre d'occurrences du terme ''données''", color="Corps",
+  labs(x="Rang", y="Nombre d'occurrences du terme \"données\"", color="Corps",
        title="Distribution des fiches métiers",
        caption="Données MESRI – Analyse CC-BY Antoine Blanchard / Datactivist") +
+    scale_color_hue(labels = c("ATRF (Cat. C)", "TECH (Cat. B)", "AI (Cat. A)", "IE (Cat. A)", "IR (Cat. A)")) +
   theme_ipsum() +
   theme(axis.title.x=element_blank(),
         axis.text.x=element_blank(),
         axis.ticks.x=element_blank(),
         panel.grid.major.x = element_blank())
+```
+
+```{r distribution_interactive, results ='asis'}
+distribution_interactive <- distribution_corps_avec_intitule + geom_point_interactive(aes(tooltip = referens_intitule), size = 2)
+girafe(code = print(distribution_interactive))
 ```
 
 Et sous forme de table :

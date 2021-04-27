@@ -115,6 +115,7 @@ data_filtered %>%
   labs(x="Rang", y="Nombre d'occurrences du terme ''données''", color="Corps",
        title="Distribution des fiches métiers",
        caption="Données MESRI – Analyse CC-BY Antoine Blanchard / Datactivist") +
+    scale_color_hue(labels = c("ATRF (Cat. C)", "TECH (Cat. B)", "AI (Cat. A)", "IE (Cat. A)", "IR (Cat. A)")) +
   theme_ipsum() +
   theme(axis.title.x=element_blank(),
         axis.text.x=element_blank(),
@@ -143,9 +144,10 @@ data_filtered %>%
     segment.size      = 0.2,
     segment.curvature = -0.1,
     segment.inflect=FALSE) +
-  labs(x="Rang", y="Nombre d'occurrences du terme ''données''", color="Corps",
+  labs(x="Rang", y="Nombre d'occurrences du terme \"données\"", color="Corps",
        title="Distribution des fiches métiers",
        caption="Données MESRI – Analyse CC-BY Antoine Blanchard / Datactivist") +
+    scale_color_hue(labels = c("ATRF (Cat. C)", "TECH (Cat. B)", "AI (Cat. A)", "IE (Cat. A)", "IR (Cat. A)")) +
   theme_ipsum() +
   theme(axis.title.x=element_blank(),
         axis.text.x=element_blank(),
