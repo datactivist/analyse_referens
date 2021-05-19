@@ -549,4 +549,6 @@ non.
 
 ## Répéter les étapes avec le terme “archives”
 
-save.image(file = “my\_workspace.RData”)
+``` r
+save.image(file = "my_workspace.RData")
+```
