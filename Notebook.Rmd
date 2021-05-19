@@ -365,3 +365,5 @@ Dans le premier cas il s'agit d'une évolution des missions, dans le second cas 
 ## Afficher le terme "données" en kwic (keyword-in-context) et représenter son voisinage lexical (qualificatifs, verbes relatifs à des processus managériaux…)
 
 ## Répéter les étapes avec le terme "archives"
+
+save.image(file = "my_workspace.RData")

@@ -136,8 +136,10 @@ On étiquette ces 8 métiers (les autres étiquettes s’affichent au survol)
 ``` r
 distribution_corps_avec_intitule <- data_filtered %>%
     mutate(referens_id = fct_reorder(referens_id, -somme),
-         referens_cs=factor(referens_cs, levels = ordre_corps)) %>%
-  ggplot(aes(x = referens_id, y = somme, color=referens_cs, label=referens_intitule)) +
+         referens_cs=factor(referens_cs, levels = ordre_corps))
+
+  ggplot(distribution_corps_avec_intitule) +
+    aes(x = referens_id, y = somme, color=referens_cs, label=referens_intitule) +
   geom_point() +
     geom_text_repel(size=2.5,box.padding=0.5,max.overlaps = Inf,force=8, aes(label=ifelse(somme>=17,referens_intitule,'')), show.legend=FALSE,
     nudge_x           = 0.2,
@@ -155,6 +157,8 @@ distribution_corps_avec_intitule <- data_filtered %>%
         axis.ticks.x=element_blank(),
         panel.grid.major.x = element_blank())
 ```
+
+![](Notebook_files/figure-gfm/distribution_corps_avec_intitule-1.png)<!-- -->
 
 Et sous forme de table :
 
@@ -452,8 +456,10 @@ occurrences du mot “données”, avec une représentation par boxplot :
 
 ``` r
 dispersion_corps <- data_filtered %>%
-      mutate(referens_cs=factor(referens_cs, levels = ordre_corps)) %>%
-  ggplot(aes(x = referens_cs, y = somme, color=referens_cs)) +
+      mutate(referens_cs=factor(referens_cs, levels = ordre_corps))
+
+  ggplot(dispersion_corps) +
+  aes(x = referens_cs, y = somme, color=referens_cs) +
     geom_boxplot()+
   geom_jitter(shape=16, position=position_jitter (0.2)) +
     labs(x= "Corps", y = "Nombre d'occurrences du terme ''données''", color="Corps",
@@ -462,6 +468,8 @@ dispersion_corps <- data_filtered %>%
   theme_ipsum() +
     theme(legend.position = "none")
 ```
+
+![](Notebook_files/figure-gfm/boxplot_corps-1.png)<!-- -->
 
 Il apparaît que les corps IE et IR ont la distribution la plus étirée
 vers le haut, ce sont ceux où l’on trouve le plus de métiers **des**
@@ -540,3 +548,5 @@ non.
 ## Afficher le terme “données” en kwic (keyword-in-context) et représenter son voisinage lexical (qualificatifs, verbes relatifs à des processus managériaux…)
 
 ## Répéter les étapes avec le terme “archives”
+
+save.image(file = “my\_workspace.RData”)
