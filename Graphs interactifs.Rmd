@@ -1,0 +1,46 @@
+---
+title: "Graphs interactifs"
+author: "Antoine Blanchard"
+date: "5/26/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+load("../analyse_referens/my_workspace.RData")
+knitr::opts_chunk$set(echo = TRUE)
+library(ggiraph)
+library(ggplot2, quietly = TRUE)
+library(hrbrthemes, quietly = TRUE)
+library(tidyr, quietly = TRUE)
+library(dplyr, quietly = TRUE)
+```
+
+```{r distribution, include=FALSE}
+# Il convient d'exécuter le fichier Notebook.rmd avant d'exécuter ce script, qui produit des figures interactives grâce à ggiraph
+
+# Distribution des fiches métiers en fonction du nombre d'occurrences du terme "données"
+distribution_interactive = ggplot(data = distribution_corps_avec_intitule,
+                                  mapping = aes(x = referens_id, y = somme, color=referens_cs, tooltip = referens_intitule)) +
+                                    geom_point_interactive(size = 2) +
+labs(x="Rang", y="Nombre d'occurrences du terme \"données\"", color="Corps",
+     title="Distribution des fiches métiers",
+     caption="Données MESRI – Analyse CC-BY Antoine Blanchard / Datactivist") +
+  scale_color_hue(labels = c("ATRF (Cat. C)", "TECH (Cat. B)", "AI (Cat. A)", "IE (Cat. A)", "IR (Cat. A)")) +
+  theme_ipsum() +
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        panel.grid.major.x = element_blank())
+girafe(ggobj = distribution_interactive)
+```
+
+```{r dispersion, include=FALSE}
+# Dispersion des fiches métiers autour de la moyenne par BAP
+dispersion_interactive = ggplot(data = dispersion_corps, mapping = aes(x = referens_cs, y = somme, color=referens_cs, tooltip = referens_intitule)) +
+                                  geom_boxplot_interactive(size = 2) +
+                                  geom_jitter(shape=16, position=position_jitter (0.2)) +
+                                  labs(x= "Corps", y = "Nombre d'occurrences du terme \"données\"", color="Corps", title="Dispersion des fiches métiers comprenant \nle terme \"données\" par corps", caption="Données MESRI – Analyse CC-BY Antoine Blanchard / Datactivist") +
+                                  theme_ipsum() +
+                                  theme(legend.position = "none")
+girafe(ggobj = dispersion_interactive)
+```
